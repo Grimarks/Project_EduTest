@@ -1,6 +1,26 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Users, Trophy, Clock, CheckCircle, Star } from "lucide-react";
+import {
+    BookOpen,
+    Users,
+    Trophy,
+    Clock,
+    CheckCircle,
+    Star,
+} from "lucide-react";
 import heroImage from "../assets/hero-education.jpg";
+import TestCard from "../components/TestCard";
+import { mockTests } from "../data/mockData";
+
+// UI Components
+import { Button } from "../components/ui/Button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
 
 const Home = () => {
     const featuredTests = mockTests.slice(0, 3);
@@ -9,30 +29,34 @@ const Home = () => {
         { icon: Users, label: "Active Students", value: "10K+" },
         { icon: BookOpen, label: "Practice Tests", value: "500+" },
         { icon: Trophy, label: "Success Rate", value: "95%" },
-        { icon: Clock, label: "Study Hours", value: "100K+" }
+        { icon: Clock, label: "Study Hours", value: "100K+" },
     ];
 
     const features = [
         {
             icon: CheckCircle,
             title: "Comprehensive Tests",
-            description: "Wide range of practice tests covering all major subjects and exam formats"
+            description:
+                "Wide range of practice tests covering all major subjects and exam formats",
         },
         {
             icon: Clock,
             title: "Timed Practice",
-            description: "Simulate real exam conditions with time-limited practice sessions"
+            description:
+                "Simulate real exam conditions with time-limited practice sessions",
         },
         {
             icon: Trophy,
             title: "Detailed Analytics",
-            description: "Track your progress with detailed performance analytics and recommendations"
+            description:
+                "Track your progress with detailed performance analytics and recommendations",
         },
         {
             icon: Star,
             title: "Expert Content",
-            description: "Questions and materials created by subject matter experts and educators"
-        }
+            description:
+                "Questions and materials created by subject matter experts and educators",
+        },
     ];
 
     return (
@@ -58,8 +82,9 @@ const Home = () => {
                                     <span className="text-primary-glow">EduTest+</span>
                                 </h1>
                                 <p className="text-xl text-white/90 leading-relaxed">
-                                    The ultimate platform for online test simulation and premium educational classes.
-                                    Practice with real exam conditions and boost your confidence.
+                                    The ultimate platform for online test simulation and premium
+                                    educational classes. Practice with real exam conditions and
+                                    boost your confidence.
                                 </p>
                             </div>
 
@@ -67,7 +92,11 @@ const Home = () => {
                                 <Button variant="hero" size="lg" asChild>
                                     <Link to="/tests">Start Practicing Now</Link>
                                 </Button>
-                                <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-primary">
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className="border-white text-white hover:bg-white hover:text-primary"
+                                >
                                     <Link to="/premium">View Premium Classes</Link>
                                 </Button>
                             </div>
@@ -82,7 +111,9 @@ const Home = () => {
                                     {stats.map((stat, index) => (
                                         <div key={index} className="text-center space-y-2">
                                             <stat.icon className="h-8 w-8 text-primary-glow mx-auto" />
-                                            <div className="text-2xl font-bold text-white">{stat.value}</div>
+                                            <div className="text-2xl font-bold text-white">
+                                                {stat.value}
+                                            </div>
                                             <div className="text-sm text-white/80">{stat.label}</div>
                                         </div>
                                     ))}
@@ -101,13 +132,17 @@ const Home = () => {
                             Why Choose EduTest+?
                         </h2>
                         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                            Experience the most comprehensive online test preparation platform with advanced features
+                            Experience the most comprehensive online test preparation platform
+                            with advanced features
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {features.map((feature, index) => (
-                            <Card key={index} className="text-center group hover:shadow-hover transition-smooth bg-gradient-card">
+                            <Card
+                                key={index}
+                                className="text-center group hover:shadow-hover transition-smooth bg-gradient-card"
+                            >
                                 <CardHeader>
                                     <div className="mx-auto bg-gradient-hero p-3 rounded-full w-fit shadow-glow group-hover:shadow-hover transition-smooth">
                                         <feature.icon className="h-6 w-6 text-primary-foreground" />
@@ -159,7 +194,8 @@ const Home = () => {
                                 Ready to Excel in Your Exams?
                             </CardTitle>
                             <CardDescription className="text-xl text-primary-foreground/90">
-                                Join thousands of students who have improved their scores with EduTest+
+                                Join thousands of students who have improved their scores with
+                                EduTest+
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -181,7 +217,11 @@ const Home = () => {
                                 <Button variant="secondary" size="lg" asChild>
                                     <Link to="/register">Get Started Free</Link>
                                 </Button>
-                                <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                                >
                                     <Link to="/premium">Explore Premium</Link>
                                 </Button>
                             </div>

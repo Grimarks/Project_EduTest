@@ -1,3 +1,6 @@
+import {Card, CardContent, CardFooter, CardHeader, CardTitle,} from "../components/ui/Card.jsx";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import { Clock, BookOpen, Star, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -15,13 +18,12 @@ const TestCard = ({ test }) => {
         }
     };
 
-    const formatPrice = (price) => {
-        return new Intl.NumberFormat("id-ID", {
+    const formatPrice = (price) =>
+        new Intl.NumberFormat("id-ID", {
             style: "currency",
             currency: "IDR",
             minimumFractionDigits: 0,
         }).format(price);
-    };
 
     return (
         <Card className="group hover:shadow-hover transition-smooth animate-slide-up bg-gradient-card border-border/50">
