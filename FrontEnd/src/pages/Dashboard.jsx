@@ -83,9 +83,9 @@ const Dashboard = () => {
     const recommendations = mockTests.slice(0, 3);
 
     const getScoreColor = (score) => {
-        if (score >= 80) return "text-secondary";
-        if (score >= 60) return "text-accent";
-        return "text-destructive";
+        if (score >= 80) return "text-secondary-foreground";
+        if (score >= 60) return "text-accent-foreground";
+        return "text-destructive-foreground";
     };
 
     return (
@@ -269,7 +269,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
+                                <div className="flex items-center gap-3 p-3 bg-gradient-learner rounded-lg">
                                     <div className="bg-primary rounded-full p-2">
                                         <Target className="h-4 w-4 text-primary-foreground" />
                                     </div>

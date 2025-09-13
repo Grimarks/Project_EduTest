@@ -2,19 +2,44 @@ import {Card, CardContent, CardFooter, CardHeader, CardTitle,} from "../componen
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Clock, BookOpen, Star, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const TestCard = ({ test }) => {
+    const location = useLocation();
+
     const getDifficultyColor = (difficulty) => {
+        let baseClass = "";
+
         switch (difficulty) {
             case "Easy":
-                return "bg-secondary text-secondary-foreground";
+                baseClass = "bg-secondary";
+                break;
             case "Medium":
-                return "bg-accent text-accent-foreground";
+                baseClass = "bg-accent";
+                break;
             case "Hard":
-                return "bg-destructive text-destructive-foreground";
+                baseClass = "bg-destructive";
+                break;
             default:
-                return "bg-muted text-muted-foreground";
+                baseClass = "bg-muted";
+                break;
+        }
+
+        // Kalau di /tests → text putih
+        if (location.pathname.startsWith("/tests")) {
+            return `${baseClass} text-white`;
+        }
+
+        // Default di dashboard → pakai foreground sesuai config
+        switch (difficulty) {
+            case "Easy":
+                return `${baseClass} text-secondary-foreground`;
+            case "Medium":
+                return `${baseClass} text-accent-foreground`;
+            case "Hard":
+                return `${baseClass} text-destructive-foreground`;
+            default:
+                return `${baseClass} text-muted-foreground`;
         }
     };
 

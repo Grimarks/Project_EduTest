@@ -93,9 +93,9 @@ const Home = () => {
                                     <Link to="/tests">Start Practicing Now</Link>
                                 </Button>
                                 <Button
-                                    variant="outline"
+                                    variant="hero"
                                     size="lg"
-                                    className="border-white text-white hover:bg-white hover:text-primary"
+                                    className="border-white bg-black text-white hover: hover:text-primary"
                                 >
                                     <Link to="/premium">View Premium Classes</Link>
                                 </Button>

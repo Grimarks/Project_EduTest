@@ -37,7 +37,7 @@ const Navbar = () => {
                                 to={item.path}
                                 className={`text-sm font-medium transition-smooth hover:text-primary ${
                                     isActive(item.path)
-                                        ? "text-primary border-b-2 border-primary"
+                                        ? "text-primary border-b-2 border-gray-800"
                                         : "text-muted-foreground"
                                 }`}
                             >
