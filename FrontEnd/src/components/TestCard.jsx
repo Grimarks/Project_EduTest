@@ -1,4 +1,11 @@
-import {Card, CardContent, CardFooter, CardHeader, CardTitle,} from "../components/ui/Card.jsx";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Clock, BookOpen, Star, Lock } from "lucide-react";
@@ -33,13 +40,13 @@ const TestCard = ({ test }) => {
         // Default di dashboard → pakai foreground sesuai config
         switch (difficulty) {
             case "Easy":
-                return `${baseClass} text-secondary-foreground`;
+                return `${baseClass} text-white`;
             case "Medium":
-                return `${baseClass} text-accent-foreground`;
+                return `${baseClass} text-white`;
             case "Hard":
-                return `${baseClass} text-destructive-foreground`;
+                return `${baseClass} text-white`;
             default:
-                return `${baseClass} text-muted-foreground`;
+                return `${baseClass} text-white`;
         }
     };
 

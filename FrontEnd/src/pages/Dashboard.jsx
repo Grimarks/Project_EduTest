@@ -21,7 +21,7 @@ const Dashboard = () => {
     const user = {
         name: "John Doe",
         email: "john@example.com",
-        isPremium: false,
+        isPremium: true,
         joinDate: "2024-01-15"
     };
 
@@ -74,7 +74,7 @@ const Dashboard = () => {
         {
             id: "3",
             title: "General Knowledge Quiz",
-            score: 91,
+            score: 53,
             date: "2024-01-15",
             duration: "45m"
         }
@@ -264,7 +264,7 @@ const Dashboard = () => {
                                         <Trophy className="h-4 w-4 text-secondary" />
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-medium text-secondary-foreground">First Perfect Score!</h4>
+                                        <h4 className="text-sm font-medium text-foreground">First Perfect Score!</h4>
                                         <p className="text-xs text-secondary-foreground/80">Scored 100% on General Knowledge Quiz</p>
                                     </div>
                                 </div>
