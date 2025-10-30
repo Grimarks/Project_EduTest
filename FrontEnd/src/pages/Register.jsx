@@ -1,13 +1,22 @@
+// src/pages/Register.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
 import { Checkbox } from "../components/ui/checkbox.jsx";
 import { BookOpen, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
-import { useToast } from "../hooks/use-toast";
+import { useToast } from "../hooks/use-toast.jsx";
+import { useAuth } from "../context/UseAuth.jsx";
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -22,6 +31,7 @@ const Register = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { register } = useAuth();
 
     const handleInputChange = (e) => {
         setFormData({
@@ -52,16 +62,23 @@ const Register = () => {
         }
 
         setIsLoading(true);
-
-        // Simulasi API
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            await register(formData.name, formData.email, formData.password);
             toast({
                 title: "Account created!",
-                description: "Welcome to EduTest+. You can now start learning.",
+                description: "Welcome to EduTest+. Please log in.",
             });
-            navigate("/dashboard");
-        }, 1500);
+            navigate("/login");
+        } catch (error) {
+            toast({
+                title: "Registration failed",
+                description:
+                    error.response?.data?.error || "Could not create account.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -175,7 +192,9 @@ const Register = () => {
                                         variant="ghost"
                                         size="sm"
                                         className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        onClick={() =>
+                                            setShowConfirmPassword(!showConfirmPassword)
+                                        }
                                     >
                                         {showConfirmPassword ? (
                                             <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -191,7 +210,9 @@ const Register = () => {
                                 <Checkbox
                                     id="terms"
                                     checked={acceptTerms}
-                                    onCheckedChange={(checked) => setAcceptTerms(Boolean(checked))}
+                                    onCheckedChange={(checked) =>
+                                        setAcceptTerms(Boolean(checked))
+                                    }
                                 />
                                 <Label htmlFor="terms" className="text-sm">
                                     I agree to the{" "}
@@ -207,11 +228,7 @@ const Register = () => {
                         </CardContent>
 
                         <CardFooter className="flex flex-col space-y-4">
-                            <Button
-                                type="submit"
-                                className="w-full"
-                                disabled={isLoading}
-                            >
+                            <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading ? "Creating account..." : "Create Account"}
                             </Button>
 

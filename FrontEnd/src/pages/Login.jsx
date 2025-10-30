@@ -1,13 +1,21 @@
+// src/pages/Login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
 import { BookOpen, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "../hooks/use-toast.jsx";
-import {useAuth} from "../context/AuthContext.jsx";
+import { useAuth } from "../context/UseAuth.jsx";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -16,30 +24,29 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { setIsLoggedIn } = useAuth();
+    const { login } = useAuth(); // Ambil fungsi login dari context
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        setTimeout(() => {
+        try {
+            await login(email, password); // Gunakan fungsi login dari context
+            toast({
+                title: "Welcome back!",
+                description: "You have successfully logged in.",
+            });
+            navigate("/dashboard");
+        } catch (error) {
+            toast({
+                title: "Login failed",
+                description:
+                    error.response?.data?.error || "Invalid email or password.",
+                variant: "destructive",
+            });
+        } finally {
             setIsLoading(false);
-
-            if (email === "demo@edutest.com" && password === "password") {
-                toast({
-                    title: "Welcome back!",
-                    description: "You have successfully logged in.",
-                });
-                setIsLoggedIn(true);
-                navigate("/dashboard");
-            } else {
-                toast({
-                    title: "Login failed",
-                    description: "Invalid email or password. Try demo@edutest.com / password",
-                    variant: "destructive",
-                });
-            }
-        }, 1000);
+        }
     };
 
     return (
@@ -66,6 +73,7 @@ const Login = () => {
 
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-4">
+                            {/* Email */}
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <div className="relative">
@@ -82,6 +90,7 @@ const Login = () => {
                                 </div>
                             </div>
 
+                            {/* Password */}
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
                                 <div className="relative">
@@ -116,21 +125,13 @@ const Login = () => {
                                     Forgot password?
                                 </Button>
                             </div>
-
-                            {/* Demo Credentials */}
-                            <div className="p-3 bg-muted/50 rounded-lg border border-border">
-                                <p className="text-xs text-muted-foreground mb-1">Demo Credentials:</p>
-                                <p className="text-xs font-mono">demo@edutest.com</p>
-                                <p className="text-xs font-mono">password</p>
-                            </div>
                         </CardContent>
 
-                        <CardFooter className="flex flex-col space-y-4 ">
+                        <CardFooter className="flex flex-col space-y-4">
                             <Button
                                 type="submit"
-                                className="w-full bg-blue-400"
+                                className="w-full"
                                 disabled={isLoading}
-
                             >
                                 {isLoading ? "Signing in..." : "Sign In"}
                             </Button>

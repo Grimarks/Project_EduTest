@@ -1,15 +1,19 @@
+// src/pages/TestResult.jsx
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { Trophy, Clock, Target, BookOpen, CheckCircle, XCircle, Star, ArrowRight } from "lucide-react";
-import { mockPremiumClasses } from "../data/mockData";
 
 const TestResult = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [recommendedClasses, setRecommendedClasses] = useState([]);
 
+    // Ambil data dari state navigasi
     const {
         testId,
         testTitle,
@@ -18,24 +22,34 @@ const TestResult = () => {
         totalQuestions,
         timeSpent,
         answers,
-        questions
+        questions,
     } = location.state || {};
 
-    if (!location.state) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <h1 className="text-2xl font-bold text-foreground">No test results found</h1>
-                    <Button onClick={() => navigate("/tests")}>Back to Tests</Button>
-                </div>
-            </div>
-        );
-    }
+    // Jika tidak ada state (misal user refresh halaman langsung)
+    useEffect(() => {
+        if (!location.state) {
+            navigate("/tests");
+        }
+    }, [location.state, navigate]);
 
+    // Fetch rekomendasi kelas dari API jika skor di bawah 80
+    useEffect(() => {
+        const fetchRecommendations = async () => {
+            try {
+                const res = await axios.get("/api/recommendations", { params: { testId, score } });
+                setRecommendedClasses(res.data || []);
+            } catch (err) {
+                console.error("Failed to fetch recommendations:", err);
+            }
+        };
+        if (score < 80) fetchRecommendations();
+    }, [score, testId]);
+
+    // Fungsi bantu
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        return `${minutes}:${secs.toString().padStart(2, "0")}`;
     };
 
     const getScoreColor = (score) => {
@@ -51,8 +65,6 @@ const TestResult = () => {
         if (score >= 60) return "Not bad! Room for improvement.";
         return "Keep practicing! You'll get there.";
     };
-
-    const recommendedClasses = mockPremiumClasses.slice(0, 2);
 
     return (
         <div className="min-h-screen bg-background py-8">
@@ -87,14 +99,12 @@ const TestResult = () => {
                                 <Clock className="h-8 w-8 mx-auto text-primary" />
                                 <div className="text-2xl font-bold text-foreground">{formatTime(timeSpent)}</div>
                                 <div className="text-sm text-muted-foreground">Time Spent</div>
-                                <div className="text-xs text-muted-foreground">Great pacing!</div>
                             </div>
 
                             <div className="text-center space-y-2">
                                 <Star className="h-8 w-8 mx-auto text-primary" />
                                 <div className="text-2xl font-bold text-foreground">4.2/5</div>
                                 <div className="text-sm text-muted-foreground">Performance</div>
-                                <div className="text-xs text-muted-foreground">Above average</div>
                             </div>
                         </div>
 
@@ -112,24 +122,23 @@ const TestResult = () => {
                 <Card className="mb-8 shadow-card">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <BookOpen className="h-5 w-5" />
-                            Detailed Review
+                            <BookOpen className="h-5 w-5" /> Detailed Review
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {questions?.map((question, index) => {
-                            const userAnswer = answers[question.id];
-                            const isCorrect = userAnswer === question.correctAnswer;
+                            const userAnswerIndex = answers?.[question.id];
+                            const isCorrect = userAnswerIndex === question.correctAnswer;
 
                             return (
                                 <div key={question.id} className="border border-border rounded-lg p-4 space-y-3">
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <h4 className="font-medium text-foreground mb-2">
-                                                Question {index + 1}: {question.question}
+                                                Question {index + 1}: {question.question_text || question.question}
                                             </h4>
                                             <Badge variant="outline" className="text-xs">
-                                                {question.subject}
+                                                {question.subject || "General"}
                                             </Badge>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -142,13 +151,13 @@ const TestResult = () => {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        {question.options.map((option, optionIndex) => (
+                                        {question.options?.map((option, optionIndex) => (
                                             <div
                                                 key={optionIndex}
                                                 className={`p-2 rounded border text-sm ${
                                                     optionIndex === question.correctAnswer
                                                         ? "border-secondary bg-secondary/10 text-secondary"
-                                                        : optionIndex === userAnswer && !isCorrect
+                                                        : optionIndex === userAnswerIndex && !isCorrect
                                                             ? "border-destructive bg-destructive/10 text-destructive"
                                                             : "border-border"
                                                 }`}
@@ -160,7 +169,7 @@ const TestResult = () => {
                                                 {optionIndex === question.correctAnswer && (
                                                     <span className="ml-2 text-xs">(Correct)</span>
                                                 )}
-                                                {optionIndex === userAnswer && optionIndex !== question.correctAnswer && (
+                                                {optionIndex === userAnswerIndex && optionIndex !== question.correctAnswer && (
                                                     <span className="ml-2 text-xs">(Your answer)</span>
                                                 )}
                                             </div>
@@ -179,12 +188,11 @@ const TestResult = () => {
                 </Card>
 
                 {/* Recommendations */}
-                {score < 80 && (
+                {score < 80 && recommendedClasses.length > 0 && (
                     <Card className="mb-8 shadow-card">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Star className="h-5 w-5" />
-                                Recommended Premium Classes
+                                <Star className="h-5 w-5" /> Recommended Premium Classes
                             </CardTitle>
                             <p className="text-muted-foreground">
                                 Boost your performance with our expert-led premium classes

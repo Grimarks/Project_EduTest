@@ -1,4 +1,4 @@
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./context/UseAuth.jsx";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";

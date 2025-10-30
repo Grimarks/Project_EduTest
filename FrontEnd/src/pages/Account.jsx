@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/pages/Account.jsx
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import {
@@ -11,85 +12,59 @@ import {
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useToast } from "../hooks/use-toast";
+import { useAuth } from "../context/UseAuth";
 import { User, LogOut, Eye, EyeOff } from "lucide-react";
 
 const Account = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { user, logout } = useAuth(); // Ambil user dan logout dari context
 
-    // Dummy user data
-    const [user] = useState({
-        email: "demo@example.com",
-        name: "Demo User",
-    });
     const [updating, setUpdating] = useState(false);
-    const [name, setName] = useState("Demo User");
+    const [name, setName] = useState(user?.name || "");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
+    // Update nama bila data user berubah (misal setelah refresh)
+    useEffect(() => {
+        if (user?.name) {
+            setName(user.name);
+        }
+    }, [user]);
+
     const handleUpdateProfile = (e) => {
         e.preventDefault();
-        if (!name.trim()) {
-            toast({
-                title: "Error",
-                description: "Name cannot be empty",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        setUpdating(true);
-        // Simulate API call
-        setTimeout(() => {
-            toast({
-                title: "Success",
-                description: "Profile updated successfully",
-            });
-            setUpdating(false);
-        }, 1000);
+        toast({
+            title: "Info",
+            description:
+                "Update profile functionality not yet implemented in backend.",
+            variant: "info",
+        });
     };
 
     const handleUpdatePassword = (e) => {
         e.preventDefault();
-        if (password.length < 6) {
-            toast({
-                title: "Error",
-                description: "Password must be at least 6 characters",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            toast({
-                title: "Error",
-                description: "Passwords do not match",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        setUpdating(true);
-        // Simulate API call
-        setTimeout(() => {
-            setPassword("");
-            setConfirmPassword("");
-            toast({
-                title: "Success",
-                description: "Password updated successfully",
-            });
-            setUpdating(false);
-        }, 1000);
+        toast({
+            title: "Info",
+            description:
+                "Update password functionality not yet implemented in backend.",
+            variant: "info",
+        });
     };
 
-    const handleSignOut = () => {
+    const handleSignOut = async () => {
+        await logout();
         toast({
             title: "Signed out",
             description: "You have been signed out successfully",
         });
         navigate("/");
     };
+
+    if (!user) {
+        return <div className="text-center py-20">Loading account...</div>;
+    }
 
     return (
         <div className="min-h-screen bg-gradient-subtle py-12 px-4 sm:px-6 lg:px-8">
@@ -140,17 +115,9 @@ const Account = () => {
                                 />
                             </div>
 
-                            <Button
-                                type="submit"
-                                disabled={updating}
-                                className="bg-[hsl(217,91%,60%)] text-[hsl(0,0%,100%)] hover:bg-[hsl(217,91%,55%)]
-             inline-flex items-center justify-center gap-2 rounded-md px-4 py-2
-             text-sm font-medium shadow-card hover:shadow-hover transition-all
-             disabled:opacity-50 disabled:pointer-events-none"
-                            >
+                            <Button type="submit" disabled={updating}>
                                 {updating ? "Updating..." : "Update Profile"}
                             </Button>
-
                         </form>
                     </CardContent>
                 </Card>
@@ -192,7 +159,9 @@ const Account = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                <Label htmlFor="confirmPassword">
+                                    Confirm New Password
+                                </Label>
                                 <Input
                                     id="confirmPassword"
                                     type={showPassword ? "text" : "password"}
@@ -205,14 +174,9 @@ const Account = () => {
                             <Button
                                 type="submit"
                                 disabled={updating || !password}
-                                className="bg-[hsl(217,91%,60%)] text-[hsl(0,0%,100%)] hover:bg-[hsl(217,91%,55%)]
-             inline-flex items-center justify-center gap-2 rounded-md px-4 py-2
-             text-sm font-medium shadow-card hover:shadow-hover transition-all
-             disabled:opacity-50 disabled:pointer-events-none"
                             >
                                 {updating ? "Updating..." : "Update Password"}
                             </Button>
-
                         </form>
                     </CardContent>
                 </Card>
@@ -226,7 +190,8 @@ const Account = () => {
                     <CardContent>
                         <Button
                             onClick={handleSignOut}
-                            className="bg-[hsl(0,84%,60%)] text-[hsl(0,0%,100%)] hover:bg-[hsl(0,84%,55%)] transition-all inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium shadow-card hover:shadow-hover"
+                            variant="destructive"
+                            className="inline-flex items-center justify-center gap-2"
                         >
                             <LogOut className="h-4 w-4 mr-2" />
                             Sign Out

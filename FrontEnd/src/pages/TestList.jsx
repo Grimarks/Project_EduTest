@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "@/api/axiosConfig";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import {
@@ -6,23 +7,51 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue
+    SelectValue,
 } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
 import { Search, Filter } from "lucide-react";
 import TestCard from "../components/TestCard";
-import { mockTests, categories, difficulties } from "../data/mockData";
+
+const categories = ["All", "Mathematics", "English", "Science", "General"];
+const difficulties = ["All", "Easy", "Medium", "Hard"];
 
 const TestList = () => {
+    const [tests, setTests] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [selectedDifficulty, setSelectedDifficulty] = useState("All");
     const [showPremiumOnly, setShowPremiumOnly] = useState(false);
 
-    const filteredTests = mockTests.filter((test) => {
+    useEffect(() => {
+        const fetchTests = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const response = await axios.get("/tests");
+                const formattedTests = response.data.map((test) => ({
+                    ...test,
+                    id: String(test.id),
+                    questionCount: test.questions?.length || test.questionCount || 0,
+                }));
+                setTests(formattedTests);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to fetch tests. Please try again later.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchTests();
+    }, []);
+
+    const filteredTests = tests.filter((test) => {
         const matchesSearch =
-            test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            test.description.toLowerCase().includes(searchTerm.toLowerCase());
+            test.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            test.description?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory =
             selectedCategory === "All" || test.category === selectedCategory;
         const matchesDifficulty =
@@ -66,7 +95,7 @@ const TestList = () => {
                             />
                         </div>
 
-                        {/* Category Filter */}
+                        {/* Category */}
                         <Select
                             value={selectedCategory}
                             onValueChange={(val) => setSelectedCategory(val)}
@@ -83,7 +112,7 @@ const TestList = () => {
                             </SelectContent>
                         </Select>
 
-                        {/* Difficulty Filter */}
+                        {/* Difficulty */}
                         <Select
                             value={selectedDifficulty}
                             onValueChange={(val) => setSelectedDifficulty(val)}
@@ -166,43 +195,53 @@ const TestList = () => {
 
                 {/* Results */}
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <p className="text-muted-foreground">
-                            Showing {filteredTests.length} of {mockTests.length} tests
+                    {isLoading && (
+                        <p className="text-center text-muted-foreground">
+                            Loading tests...
                         </p>
-                        <div className="flex items-center gap-2">
-                            <Filter className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">
-                Sort by relevance
-              </span>
-                        </div>
-                    </div>
+                    )}
+                    {error && <p className="text-center text-destructive">{error}</p>}
 
-                    {/* Test Grid */}
-                    {filteredTests.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredTests.map((test) => (
-                                <TestCard key={test.id} test={test} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-16">
-                            <div className="space-y-4">
-                                <div className="text-6xl">🔍</div>
-                                <h3 className="text-2xl font-semibold text-foreground">
-                                    No tests found
-                                </h3>
-                                <p className="text-muted-foreground max-w-md mx-auto">
-                                    Try adjusting your search criteria or browse our popular tests.
+                    {!isLoading && !error && (
+                        <>
+                            <div className="flex items-center justify-between">
+                                <p className="text-muted-foreground">
+                                    Showing {filteredTests.length} of {tests.length} tests
                                 </p>
-                                <Button onClick={resetFilters}>Clear Filters</Button>
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm text-muted-foreground">
+                    Sort by relevance
+                  </span>
+                                </div>
                             </div>
-                        </div>
+
+                            {filteredTests.length > 0 ? (
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {filteredTests.map((test) => (
+                                        <TestCard key={test.id} test={test} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-16">
+                                    <div className="space-y-4">
+                                        <div className="text-6xl">🔍</div>
+                                        <h3 className="text-2xl font-semibold text-foreground">
+                                            No tests found
+                                        </h3>
+                                        <p className="text-muted-foreground max-w-md mx-auto">
+                                            Try adjusting your search criteria or browse our popular
+                                            tests.
+                                        </p>
+                                        <Button onClick={resetFilters}>Clear Filters</Button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
 
-                {/* Load More (if needed) */}
-                {filteredTests.length > 0 && filteredTests.length >= 9 && (
+                {!isLoading && !error && filteredTests.length >= 9 && (
                     <div className="text-center mt-12">
                         <Button variant="outline" size="lg">
                             Load More Tests

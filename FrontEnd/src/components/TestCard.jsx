@@ -4,19 +4,31 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Clock, BookOpen, Star, Lock } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const TestCard = ({ test }) => {
-    const location = useLocation();
+
+
+    // Normalisasi data dari API agar kompatibel
+    const normalizedTest = {
+        id: String(test.id || test._id || Math.random()),
+        title: test.title || "Untitled Test",
+        description: test.description || "No description available.",
+        category: test.category || "General",
+        difficulty: test.difficulty || "Unknown",
+        duration: test.duration ? Math.round(test.duration / 60) : 30, // ubah detik ke menit jika perlu
+        questionCount: test.questionCount || test.questions?.length || 0,
+        isPremium: test.isPremium ?? test.is_premium ?? false,
+        price: test.price || 0,
+    };
 
     const getDifficultyColor = (difficulty) => {
         let baseClass = "";
-
         switch (difficulty) {
             case "Easy":
                 baseClass = "bg-secondary";
@@ -29,25 +41,9 @@ const TestCard = ({ test }) => {
                 break;
             default:
                 baseClass = "bg-muted";
-                break;
         }
 
-        // Kalau di /tests → text putih
-        if (location.pathname.startsWith("/tests")) {
-            return `${baseClass} text-white`;
-        }
-
-        // Default di dashboard → pakai foreground sesuai config
-        switch (difficulty) {
-            case "Easy":
-                return `${baseClass} text-white`;
-            case "Medium":
-                return `${baseClass} text-white`;
-            case "Hard":
-                return `${baseClass} text-white`;
-            default:
-                return `${baseClass} text-white`;
-        }
+        return `${baseClass} text-white`;
     };
 
     const formatPrice = (price) =>
@@ -62,22 +58,22 @@ const TestCard = ({ test }) => {
             <CardHeader className="space-y-3">
                 <div className="flex items-start justify-between">
                     <Badge variant="outline" className="text-xs">
-                        {test.category}
+                        {normalizedTest.category}
                     </Badge>
-                    <Badge className={getDifficultyColor(test.difficulty)}>
-                        {test.difficulty}
+                    <Badge className={getDifficultyColor(normalizedTest.difficulty)}>
+                        {normalizedTest.difficulty}
                     </Badge>
                 </div>
 
                 <CardTitle className="text-lg group-hover:text-primary transition-smooth">
-                    {test.title}
-                    {test.isPremium && (
+                    {normalizedTest.title}
+                    {normalizedTest.isPremium && (
                         <Lock className="inline-block ml-2 h-4 w-4 text-accent" />
                     )}
                 </CardTitle>
 
                 <p className="text-sm text-muted-foreground line-clamp-2">
-                    {test.description}
+                    {normalizedTest.description}
                 </p>
             </CardHeader>
 
@@ -85,20 +81,20 @@ const TestCard = ({ test }) => {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        <span>{test.duration} mins</span>
+                        <span>{normalizedTest.duration} mins</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <BookOpen className="h-4 w-4" />
-                        <span>{test.questionCount} questions</span>
+                        <span>{normalizedTest.questionCount} questions</span>
                     </div>
                 </div>
 
-                {test.isPremium && test.price && (
+                {normalizedTest.isPremium && normalizedTest.price > 0 && (
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">Price:</span>
                         <span className="font-semibold text-accent">
-              {formatPrice(test.price)}
-            </span>
+                            {formatPrice(normalizedTest.price)}
+                        </span>
                     </div>
                 )}
 
@@ -111,11 +107,11 @@ const TestCard = ({ test }) => {
             <CardFooter>
                 <Button
                     asChild
-                    variant={test.isPremium ? "secondary" : "default"}
+                    variant={normalizedTest.isPremium ? "secondary" : "default"}
                     className="w-full"
                 >
-                    <Link to={`/test/${test.id}`}>
-                        {test.isPremium ? "View Premium Test" : "Start Test"}
+                    <Link to={`/test/${normalizedTest.id}`}>
+                        {normalizedTest.isPremium ? "View Premium Test" : "Start Test"}
                     </Link>
                 </Button>
             </CardFooter>
