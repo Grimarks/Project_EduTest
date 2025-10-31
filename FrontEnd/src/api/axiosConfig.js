@@ -1,9 +1,18 @@
 import axios from 'axios';
 
-// Atur base URL untuk semua permintaan Axios
-axios.defaults.baseURL = 'http://localhost:3000/api'; // Sesuaikan jika base URL berbeda
+// Buat instance axios agar tidak bentrok dengan konfigurasi global lain
+const instance = axios.create({
+    baseURL: 'http://localhost:3000/api', // ganti sesuai URL backend kamu
+    withCredentials: true, // penting jika backend pakai cookie untuk autentikasi
+});
 
-// Penting: Izinkan pengiriman cookies dengan setiap permintaan
-axios.defaults.withCredentials = true;
+// Interceptor: otomatis sisipkan token di header Authorization
+instance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
-export default axios;
+export default instance;

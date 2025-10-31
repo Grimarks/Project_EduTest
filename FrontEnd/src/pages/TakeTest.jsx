@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import axios from "@/api/axiosConfig";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
 import { Badge } from "../components/ui/badge";
 import { Clock, ChevronLeft, ChevronRight, Flag } from "lucide-react";
+import { useAuth } from "../context/UseAuth"; // <-- DITAMBAHKAN
 
 const TakeTest = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation(); // <-- DITAMBAHKAN
+    const { isLoggedIn, isLoading: isAuthLoading } = useAuth(); // <-- DITAMBAHKAN
 
     const [test, setTest] = useState(null);
     const [questions, setQuestions] = useState([]);
@@ -21,7 +24,28 @@ const TakeTest = () => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [startTime, setStartTime] = useState(null);
 
+    // --- BLOK PERBAIKAN OTENTIKASI ---
     useEffect(() => {
+        // Cek status login SEBELUM mengambil data tes
+        if (!isAuthLoading && !isLoggedIn) {
+            // Jika loading auth selesai dan user TIDAK login,
+            // redirect ke halaman login.
+            // Kita simpan lokasi saat ini (location.pathname)
+            // agar setelah login bisa kembali ke halaman tes ini.
+            toast({
+                title: "Akses Ditolak",
+                description: "Anda harus login untuk mengambil tes.",
+                variant: "destructive",
+            });
+            navigate("/login", { state: { from: location.pathname } });
+        }
+    }, [isAuthLoading, isLoggedIn, navigate, location.pathname]);
+    // --- AKHIR BLOK PERBAIKAN ---
+
+    useEffect(() => {
+        // Jangan fetch data jika auth masih loading atau jika user tidak login
+        if (isAuthLoading || !isLoggedIn) return; // <-- DITAMBAHKAN
+
         const fetchTestData = async () => {
             setIsLoading(true);
             setError(null);
@@ -29,7 +53,7 @@ const TakeTest = () => {
                 const testResponse = await axios.get(`/tests/${testId}`);
                 const fetchedTest = { ...testResponse.data, id: String(testResponse.data.id) };
                 setTest(fetchedTest);
-                setTimeLeft(fetchedTest.duration * 60);
+                setTimeLeft(fetchedTest.duration * 60); // Durasi dari backend dalam menit
                 setStartTime(Date.now());
 
                 const questionsResponse = await axios.get(`/questions/test/${testId}`);
@@ -43,26 +67,14 @@ const TakeTest = () => {
             } catch (err) {
                 console.error("Failed to load test:", err);
                 setError("Failed to load the test. Please go back and try again.");
-                if (err.response?.status === 404) setError("Test not found.");
+                if (err.response?.status === 404) setError("Test not found (404).");
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchTestData();
-    }, [testId]);
-
-    useEffect(() => {
-        if (!isLoading && !error && test && timeLeft > 0 && !isSubmitted) {
-            const timer = setTimeout(() => {
-                const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-                setTimeLeft(Math.max(0, test.duration * 60 - elapsedSeconds));
-            }, 1000);
-            return () => clearTimeout(timer);
-        } else if (!isLoading && !error && test && timeLeft === 0 && !isSubmitted) {
-            handleSubmit();
-        }
-    }, [timeLeft, isSubmitted, isLoading, error, test, startTime]);
+    }, [testId, isAuthLoading, isLoggedIn]); // <-- Tambahkan dependency
 
     const handleAnswerSelect = (questionId, optionIndex) => {
         setAnswers({ ...answers, [questionId]: optionIndex });
@@ -76,14 +88,16 @@ const TakeTest = () => {
 
     const handlePrevious = () => {
         if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(currentQuestionIndex - 1);
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
         }
     };
 
     const handleSubmit = async () => {
         if (isSubmitted) return;
         setIsSubmitted(true);
-        const timeSpent = test ? test.duration * 60 - timeLeft : 0;
+        // Pastikan durasi dalam detik (backend mungkin mengirim menit)
+        const totalDurationSeconds = test ? test.duration * 60 : 0;
+        const timeSpent = totalDurationSeconds > 0 ? totalDurationSeconds - timeLeft : 0;
 
         const formattedAnswers = Object.entries(answers).map(([questionId, selectedAnswer]) => ({
             question_id: questionId,
@@ -106,12 +120,17 @@ const TakeTest = () => {
                     totalQuestions: response.data.total_questions,
                     timeSpent: response.data.time_spent,
                     answers,
-                    questions,
+                    questions, // Pastikan questions dikirim ke halaman hasil
                 },
             });
         } catch (error) {
             console.error("Failed to submit test:", error);
-            setIsSubmitted(false);
+            setIsSubmitted(false); // Biarkan user mencoba submit lagi jika gagal
+            toast({
+                title: "Submit Gagal",
+                description: "Gagal mengirimkan hasil tes. Coba lagi.",
+                variant: "destructive",
+            });
         }
     };
 
@@ -122,19 +141,26 @@ const TakeTest = () => {
     };
 
     const getTimeColor = () => {
+        if (!test || !test.duration) return "text-foreground";
         const percentageLeft = (timeLeft / (test.duration * 60)) * 100;
         if (percentageLeft <= 10) return "text-destructive";
         if (percentageLeft <= 25) return "text-accent";
         return "text-foreground";
     };
 
-    if (isLoading) return <div className="p-8 text-center">Loading test...</div>;
+    // Tampilkan loading jika data tes ATAU status auth sedang dimuat
+    if (isLoading || isAuthLoading) return <div className="p-8 text-center">Loading test...</div>;
+
     if (error) return (
         <div className="p-8 text-center text-destructive">
             {error}
             <Button onClick={() => navigate("/tests")} className="mt-4">Back to Tests</Button>
         </div>
     );
+
+    // Jangan render apapun jika user tidak login (karena akan di-redirect)
+    if (!isLoggedIn) return null;
+
     if (!test || questions.length === 0) return <div className="p-8 text-center">Test data is incomplete.</div>;
 
     const currentQuestion = questions[currentQuestionIndex];
@@ -144,6 +170,7 @@ const TakeTest = () => {
     return (
         <div className="min-h-screen bg-background py-6">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* ... (sisa JSX tidak berubah) ... */}
                 <div className="mb-6">
                     <Card className="shadow-card">
                         <CardHeader>
@@ -152,7 +179,7 @@ const TakeTest = () => {
                                     <CardTitle className="text-xl">{test.title}</CardTitle>
                                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                         <span>Question {currentQuestionIndex + 1} of {totalQuestions}</span>
-                                        <Badge variant="outline">{currentQuestion.subject}</Badge>
+                                        <Badge variant="outline">{currentQuestion.subject || 'General'}</Badge>
                                     </div>
                                 </div>
                                 <div className="text-right">

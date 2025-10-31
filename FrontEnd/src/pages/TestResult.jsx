@@ -1,7 +1,7 @@
 // src/pages/TestResult.jsx
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/api/axiosConfig";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -32,39 +32,47 @@ const TestResult = () => {
         }
     }, [location.state, navigate]);
 
-    // Fetch rekomendasi kelas dari API jika skor di bawah 80
+    // Fetch rekomendasi kelas (hanya jika skor < 80)
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
-                const res = await axios.get("/api/recommendations", { params: { testId, score } });
-                setRecommendedClasses(res.data || []);
+                const res = await axios.get("/premium-classes");
+                setRecommendedClasses((res.data || []).slice(0, 2)); // Ambil 2 kelas pertama
             } catch (err) {
                 console.error("Failed to fetch recommendations:", err);
             }
         };
-        if (score < 80) fetchRecommendations();
-    }, [score, testId]);
+        if (location.state && score < 80) {
+            fetchRecommendations();
+        }
+    }, [score, location.state]);
 
-    // Fungsi bantu
+    // Format waktu
     const formatTime = (seconds) => {
+        if (typeof seconds !== "number") return "0:00";
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${minutes}:${secs.toString().padStart(2, "0")}`;
     };
 
-    const getScoreColor = (score) => {
-        if (score >= 80) return "text-secondary";
-        if (score >= 60) return "text-accent";
+    const getScoreColor = (scoreValue) => {
+        if (scoreValue >= 80) return "text-secondary";
+        if (scoreValue >= 60) return "text-accent";
         return "text-destructive";
     };
 
-    const getScoreMessage = (score) => {
-        if (score >= 90) return "Excellent! Outstanding performance!";
-        if (score >= 80) return "Great job! Well done!";
-        if (score >= 70) return "Good work! Keep it up!";
-        if (score >= 60) return "Not bad! Room for improvement.";
+    const getScoreMessage = (scoreValue) => {
+        if (scoreValue >= 90) return "Excellent! Outstanding performance!";
+        if (scoreValue >= 80) return "Great job! Well done!";
+        if (scoreValue >= 70) return "Good work! Keep it up!";
+        if (scoreValue >= 60) return "Not bad! Room for improvement.";
         return "Keep practicing! You'll get there.";
     };
+
+    // Jika state kosong (misal user refresh)
+    if (!location.state) {
+        return <div className="p-8 text-center">Loading result...</div>;
+    }
 
     return (
         <div className="min-h-screen bg-background py-8">

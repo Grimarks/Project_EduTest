@@ -9,6 +9,7 @@ import (
     "github.com/Grimarks/Project-TryOutOnline-GDGoC/internal/service"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/logger"
+    "github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -46,6 +47,12 @@ func main() {
 
     app := fiber.New()
     app.Use(logger.New())
+
+    app.Use(cors.New(cors.Config{
+            AllowOrigins:     "http://localhost:5173", // Sesuaikan jika port frontend Anda beda
+            AllowCredentials: true,                    // WAJIB agar cookie (login) bisa terkirim
+            AllowHeaders:     "Origin, Content-Type, Accept",
+        }))
 
     app.Static("/uploads", "./public/uploads")
 

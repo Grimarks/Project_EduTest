@@ -1,7 +1,7 @@
 // src/components/Navbar.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button.jsx";
-import { BookOpen, Menu, X, CircleUserRound } from "lucide-react";
+import { BookOpen, Menu, X, CircleUserRound, ShieldCheck } from "lucide-react"; // <-- Tambah ShieldCheck
 import { useState } from "react";
 import { useAuth } from "../context/UseAuth.jsx";
 
@@ -9,12 +9,11 @@ const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const { isLoggedIn, user, logout } = useAuth(); // ambil semua state dan fungsi dari context
-
+    const { isLoggedIn, user, logout } = useAuth();
     const handleLogout = async () => {
         await logout();
-        navigate("/"); // arahkan ke home setelah logout
-        setIsMenuOpen(false); // tutup menu mobile
+        navigate("/");
+        setIsMenuOpen(false);
     };
 
     const navItems = [
@@ -30,7 +29,7 @@ const Navbar = () => {
         <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-card">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo */}
+                    {/* ... Logo ... */}
                     <Link to="/" className="flex items-center space-x-2">
                         <div className="bg-gradient-hero p-2 rounded-lg shadow-glow">
                             <BookOpen className="h-6 w-6 text-primary-foreground" />
@@ -38,7 +37,6 @@ const Navbar = () => {
                         <span className="text-xl font-bold text-foreground">EduTest+</span>
                     </Link>
 
-                    {/* Menu Desktop */}
                     <div className="hidden md:flex items-center space-x-8">
                         {navItems.map((item) => (
                             <Link
@@ -46,7 +44,7 @@ const Navbar = () => {
                                 to={item.path}
                                 className={`text-sm font-medium transition-smooth hover:text-primary ${
                                     isActive(item.path)
-                                        ? "text-primary border-b-2 border-gray-800"
+                                        ? "text-primary border-b-2 border-primary" // (Perbaikan kecil)
                                         : "text-muted-foreground"
                                 }`}
                             >
@@ -55,13 +53,22 @@ const Navbar = () => {
                         ))}
                     </div>
 
-                    {/* Tombol Auth Desktop */}
                     <div className="hidden md:flex items-center space-x-4">
                         {isLoggedIn ? (
                             <>
                                 <span className="text-sm text-muted-foreground">
                                     Hi, {user?.name}
                                 </span>
+
+                                {user?.role === 'admin' && (
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link to="/admin/dashboard" className="text-accent hover:text-accent-foreground">
+                                            <ShieldCheck className="h-4 w-4 mr-2" />
+                                            Admin
+                                        </Link>
+                                    </Button>
+                                )}
+
                                 <Link to="/account">
                                     <CircleUserRound className="h-6 w-6 text-primary cursor-pointer hover:opacity-80" />
                                 </Link>
@@ -81,7 +88,6 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Tombol Menu Mobile */}
                     <div className="md:hidden">
                         <Button
                             variant="ghost"
@@ -93,7 +99,6 @@ const Navbar = () => {
                     </div>
                 </div>
 
-                {/* Menu Mobile */}
                 {isMenuOpen && (
                     <div className="md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-card border-t border-border">
@@ -111,6 +116,17 @@ const Navbar = () => {
                                     {item.name}
                                 </Link>
                             ))}
+
+                            {isLoggedIn && user?.role === 'admin' && (
+                                <Link
+                                    to="/admin/dashboard"
+                                    className={`block px-3 py-2 rounded-md text-base font-medium transition-smooth text-accent bg-accent/10`}
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <ShieldCheck className="h-4 w-4 mr-2 inline" />
+                                    Admin Panel
+                                </Link>
+                            )}
 
                             <div className="flex space-x-2 px-3 py-2 border-t border-border mt-2">
                                 {isLoggedIn ? (

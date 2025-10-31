@@ -34,6 +34,7 @@ const Dashboard = () => {
 
     const [recentTests, setRecentTests] = useState([]);
     const [recommendations, setRecommendations] = useState([]);
+    const [progressOverview, setProgressOverview] = useState([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
     const [error, setError] = useState(null);
 
@@ -43,18 +44,26 @@ const Dashboard = () => {
         return "text-destructive-foreground";
     };
 
+    const formatStudyTime = (totalSeconds) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        if (hours > 0) return `${hours} hrs ${minutes} mins`;
+        return `${minutes} mins`;
+    };
+
     useEffect(() => {
         const fetchDashboardData = async () => {
             if (!user?.id || isAuthLoading) return;
 
             setIsLoadingData(true);
             setError(null);
+
             try {
-                // Fetch hasil tes user
+                // Ambil hasil tes user
                 const resultsResponse = await axios.get(`/test-results/user/${user.id}`);
                 const results = resultsResponse.data || [];
 
-                // Fetch rekomendasi tes
+                // Ambil rekomendasi tes
                 const recResponse = await axios.get("/tests?limit=3&premium=false");
                 setRecommendations(recResponse.data || []);
 
@@ -62,11 +71,33 @@ const Dashboard = () => {
                 const completed = results.length;
                 const totalScore = results.reduce((sum, r) => sum + (r.score || 0), 0);
                 const avgScore = completed > 0 ? Math.round(totalScore / completed) : 0;
+                const totalTimeSeconds = results.reduce(
+                    (sum, r) => sum + (r.time_spent || 0),
+                    0
+                );
+                const studyTimeFormatted = formatStudyTime(totalTimeSeconds);
+
+                // Hitung rata-rata skor per kategori
+                const categoryScores = {};
+                results.forEach((r) => {
+                    const category = r.Test?.category || "General";
+                    if (!categoryScores[category]) categoryScores[category] = [];
+                    categoryScores[category].push(r.score || 0);
+                });
+
+                const progressData = Object.entries(categoryScores).map(
+                    ([subject, scores]) => {
+                        const avg = scores.reduce((s, v) => s + v, 0) / scores.length;
+                        return { subject, value: Math.round(avg) };
+                    }
+                );
+
+                setProgressOverview(progressData);
 
                 setStats({
                     testsCompleted: completed,
                     averageScore: avgScore,
-                    studyTime: 0,
+                    studyTime: studyTimeFormatted,
                     rank: "N/A",
                 });
 
@@ -87,7 +118,9 @@ const Dashboard = () => {
     }
 
     if (!user) {
-        return <div className="p-8 text-center">Silakan login untuk melihat dashboard.</div>;
+        return (
+            <div className="p-8 text-center">Silakan login untuk melihat dashboard.</div>
+        );
     }
 
     if (error) {
@@ -97,7 +130,7 @@ const Dashboard = () => {
     const statCards = [
         { title: "Tests Completed", value: stats.testsCompleted, icon: BookOpen },
         { title: "Average Score", value: `${stats.averageScore}%`, icon: Trophy },
-        { title: "Study Time", value: `${stats.studyTime} hrs`, icon: Clock },
+        { title: "Study Time", value: stats.studyTime, icon: Clock },
         { title: "Rank", value: stats.rank, icon: TrendingUp },
     ];
 
@@ -149,7 +182,7 @@ const Dashboard = () => {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Left */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Recent Results */}
+                        {/* Recent Test Results */}
                         <Card className="shadow-card">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
@@ -182,13 +215,16 @@ const Dashboard = () => {
                                     : "-"}
                             </span>
                                                         <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" /> {test.duration || "—"}
+                              <Clock className="h-3 w-3" />{" "}
+                                                            {formatStudyTime(test.time_spent || 0)}
                             </span>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
                                                     <div
-                                                        className={`text-lg font-bold ${getScoreColor(test.score)}`}
+                                                        className={`text-lg font-bold ${getScoreColor(
+                                                            test.score
+                                                        )}`}
                                                     >
                                                         {test.score ?? "-"}%
                                                     </div>
@@ -210,24 +246,25 @@ const Dashboard = () => {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <TrendingUp className="h-5 w-5" />
-                                    Progress Overview
+                                    Progress Overview (by Category)
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {[
-                                    { subject: "Mathematics", value: 85 },
-                                    { subject: "English", value: 72 },
-                                    { subject: "Science", value: 68 },
-                                    { subject: "General Knowledge", value: 91 },
-                                ].map((item, idx) => (
-                                    <div key={idx} className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span>{item.subject}</span>
-                                            <span>{item.value}%</span>
+                                {progressOverview.length > 0 ? (
+                                    progressOverview.map((item, idx) => (
+                                        <div key={idx} className="space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span>{item.subject}</span>
+                                                <span>{item.value}%</span>
+                                            </div>
+                                            <Progress value={item.value} className="h-2" />
                                         </div>
-                                        <Progress value={item.value} className="h-2" />
-                                    </div>
-                                ))}
+                                    ))
+                                ) : (
+                                    <p className="text-muted-foreground">
+                                        Take a test to see your progress overview.
+                                    </p>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
@@ -262,31 +299,6 @@ const Dashboard = () => {
                             </CardContent>
                         </Card>
 
-                        {/* Achievements */}
-                        <Card className="shadow-card">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Award className="h-5 w-5" />
-                                    Recent Achievements
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center gap-3 p-3 bg-gradient-success rounded-lg">
-                                    <div className="bg-secondary-foreground rounded-full p-2">
-                                        <Trophy className="h-4 w-4 text-secondary" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-medium text-foreground">
-                                            First Perfect Score!
-                                        </h4>
-                                        <p className="text-xs text-secondary-foreground/80">
-                                            Scored 100% on General Knowledge Quiz
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
                         {/* Premium Upgrade */}
                         {!user.is_premium && (
                             <Card className="shadow-card bg-gradient-hero text-primary-foreground">
@@ -317,7 +329,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Recommended */}
+                {/* Recommended Section */}
                 <div className="mt-12">
                     <div className="flex items-center justify-between mb-6">
                         <div>
@@ -334,9 +346,15 @@ const Dashboard = () => {
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {recommendations.map((test) => (
-                            <TestCard key={test.id} test={test} />
-                        ))}
+                        {recommendations.length > 0 ? (
+                            recommendations.map((test) => (
+                                <TestCard key={test.id} test={test} />
+                            ))
+                        ) : (
+                            <p className="text-muted-foreground md:col-span-2 lg:col-span-3">
+                                No recommendations available right now.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

@@ -14,6 +14,14 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import Account from "./pages/Account.jsx";
+import AdminRoute from "./components/AdminRoute.jsx";
+import AdminLayout from "./components/AdminLayout.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import AdminManageTests from "./pages/admin/AdminManageTests.jsx";
+import AdminManageClasses from "./pages/admin/AdminManageClasses.jsx";
+import AdminManageQuestions from "./pages/admin/AdminManageQuestions.jsx";
+import AdminManageUsers from "./pages/admin/AdminManageUsers.jsx";
+import AdminManageOrders from "./pages/admin/AdminManageOrders.jsx";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +44,18 @@ const App = () => {
                                     <Route path="/login" element={<Login />} />
                                     <Route path="/register" element={<Register />} />
                                     <Route path="/account" element={<Account/>}/>
+
+                                    <Route element={<AdminRoute />}>
+                                        <Route path="/admin" element={<AdminLayout />}>
+                                            <Route path="dashboard" element={<AdminDashboard />} />
+                                            <Route path="tests" element={<AdminManageTests />} />
+                                            <Route path="classes" element={<AdminManageClasses />} />
+                                            <Route path="questions" element={<AdminManageQuestions />} />
+                                            <Route path="users" element={<AdminManageUsers />} />
+                                            <Route path="orders" element={<AdminManageOrders />} />
+                                        </Route>
+                                    </Route>
+
                                     <Route path="*" element={<NotFound />} />
                                 </Routes>
                             </main>

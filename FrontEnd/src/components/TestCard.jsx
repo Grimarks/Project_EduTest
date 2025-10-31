@@ -4,24 +4,23 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/Card.jsx"; // Path diperjelas
 
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
+import { Badge } from "@/components/ui/badge.jsx"; // Path benar
+import { Button } from "@/components/ui/button.jsx"; // Path benar
 import { Clock, BookOpen, Star, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const TestCard = ({ test }) => {
-
-
-    // Normalisasi data dari API agar kompatibel
+    // Normalisasi data agar konsisten
     const normalizedTest = {
         id: String(test.id || test._id || Math.random()),
         title: test.title || "Untitled Test",
         description: test.description || "No description available.",
         category: test.category || "General",
         difficulty: test.difficulty || "Unknown",
-        duration: test.duration ? Math.round(test.duration / 60) : 30, // ubah detik ke menit jika perlu
+        // Backend mengirim durasi dalam menit, bukan detik
+        duration: test.duration || 30,
         questionCount: test.questionCount || test.questions?.length || 0,
         isPremium: test.isPremium ?? test.is_premium ?? false,
         price: test.price || 0,

@@ -13,19 +13,21 @@ import { Badge } from "../components/ui/badge";
 import { Search, Filter } from "lucide-react";
 import TestCard from "../components/TestCard";
 
-const categories = ["All", "Mathematics", "English", "Science", "General"];
-const difficulties = ["All", "Easy", "Medium", "Hard"];
-
 const TestList = () => {
     const [tests, setTests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // --- FILTER DINAMIS ---
+    const [categories, setCategories] = useState(["All"]);
+    const [difficulties, setDifficulties] = useState(["All"]);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [selectedDifficulty, setSelectedDifficulty] = useState("All");
     const [showPremiumOnly, setShowPremiumOnly] = useState(false);
 
+    // --- FETCH DATA DARI API ---
     useEffect(() => {
         const fetchTests = async () => {
             setIsLoading(true);
@@ -38,6 +40,17 @@ const TestList = () => {
                     questionCount: test.questions?.length || test.questionCount || 0,
                 }));
                 setTests(formattedTests);
+
+                // --- BUAT FILTER DINAMIS DARI DATA API ---
+                const uniqueCategories = [
+                    ...new Set(formattedTests.map((t) => t.category || "General")),
+                ];
+                setCategories(["All", ...uniqueCategories]);
+
+                const uniqueDifficulties = [
+                    ...new Set(formattedTests.map((t) => t.difficulty || "Unknown")),
+                ];
+                setDifficulties(["All", ...uniqueDifficulties]);
             } catch (err) {
                 console.error(err);
                 setError("Failed to fetch tests. Please try again later.");
@@ -48,6 +61,7 @@ const TestList = () => {
         fetchTests();
     }, []);
 
+    // --- FILTERING ---
     const filteredTests = tests.filter((test) => {
         const matchesSearch =
             test.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,7 +95,7 @@ const TestList = () => {
                     </p>
                 </div>
 
-                {/* Search and Filters */}
+                {/* Search & Filters */}
                 <div className="bg-card rounded-lg border border-border p-6 shadow-card mb-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                         {/* Search */}
@@ -211,8 +225,8 @@ const TestList = () => {
                                 <div className="flex items-center gap-2">
                                     <Filter className="h-4 w-4 text-muted-foreground" />
                                     <span className="text-sm text-muted-foreground">
-                    Sort by relevance
-                  </span>
+                                        Sort by relevance
+                                    </span>
                                 </div>
                             </div>
 
@@ -230,8 +244,7 @@ const TestList = () => {
                                             No tests found
                                         </h3>
                                         <p className="text-muted-foreground max-w-md mx-auto">
-                                            Try adjusting your search criteria or browse our popular
-                                            tests.
+                                            Try adjusting your search criteria or browse our popular tests.
                                         </p>
                                         <Button onClick={resetFilters}>Clear Filters</Button>
                                     </div>

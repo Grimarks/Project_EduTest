@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "@/api/axiosConfig";
 import {
     BookOpen,
     Users,
@@ -9,21 +11,39 @@ import {
 } from "lucide-react";
 import heroImage from "../assets/hero-education.jpg";
 import TestCard from "../components/TestCard";
-import { mockTests } from "../data/mockData";
 
 // UI Components
-import { Button } from "../components/ui/Button";
+import { Button } from "../components/ui/button.jsx";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
+} from "../components/ui/Card.jsx";
+import { Badge } from "../components/ui/badge.jsx";
 
 const Home = () => {
-    const featuredTests = mockTests.slice(0, 3);
+    const [featuredTests, setFeaturedTests] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchFeaturedTests = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const response = await axios.get("/tests?limit=3");
+                setFeaturedTests(response.data || []);
+            } catch (err) {
+                console.error("Failed to fetch featured tests:", err);
+                setError("Could not load featured tests.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchFeaturedTests();
+    }, []);
 
     const stats = [
         { icon: Users, label: "Active Students", value: "10K+" },
@@ -95,7 +115,7 @@ const Home = () => {
                                 <Button
                                     variant="hero"
                                     size="lg"
-                                    className="border-white bg-black text-white hover: hover:text-primary"
+                                    className="border-white bg-black text-white hover:text-primary"
                                 >
                                     <Link to="/premium">View Premium Classes</Link>
                                 </Button>
@@ -178,9 +198,17 @@ const Home = () => {
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {featuredTests.map((test) => (
-                            <TestCard key={test.id} test={test} />
-                        ))}
+                        {isLoading && <p>Loading tests...</p>}
+                        {error && <p className="text-destructive">{error}</p>}
+                        {!isLoading && !error && featuredTests.length === 0 && (
+                            <p>No featured tests available at the moment.</p>
+                        )}
+                        {!isLoading &&
+                            !error &&
+                            featuredTests.length > 0 &&
+                            featuredTests.map((test) => (
+                                <TestCard key={test.id} test={test} />
+                            ))}
                     </div>
                 </div>
             </section>

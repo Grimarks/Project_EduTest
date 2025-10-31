@@ -80,7 +80,7 @@ const Footer = () => {
 
                 <div className="border-t border-border mt-8 pt-8 text-center">
                     <p className="text-sm text-muted-foreground">
-                        © 2024 EduTest+. All rights reserved. Built with ❤️ for better education.
+                        © 2024 EduTest+. All rights reserved. Built with <span className="text-pink-300">LOVE</span>️ for better education.
                     </p>
                 </div>
             </div>
