@@ -78,7 +78,10 @@ const AdminQuestionForm = () => {
             test_id: testId,
             question_text: questionText,
             options: JSON.stringify(options), // Kirim sebagai string JSON
-            correct_answer: correctAnswer,
+            // --- PERBAIKAN DI SINI ---
+            // Memastikan correct_answer adalah integer, walaupun seharusnya sudah
+            correct_answer: parseInt(correctAnswer, 10),
+            // --- AKHIR PERBAIKAN ---
             explanation: explanation,
         };
 
