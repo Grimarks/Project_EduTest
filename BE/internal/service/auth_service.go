@@ -19,6 +19,7 @@ type AuthService interface {
 	GetMe(userID string) (*model.User, error)
 	Logout(userID string) error
 	GetRedisToken(userID string) (string, error)
+	GetAllUsers() ([]model.User, error) // <-- DITAMBAHKAN
 }
 
 type authService struct {
@@ -79,4 +80,9 @@ func (s *authService) GetRedisToken(userID string) (string, error) {
 		return "", err
 	}
 	return val, nil
+}
+
+// --- FUNGSI BARU UNTUK AMBIL SEMUA USER!!!  ---
+func (s *authService) GetAllUsers() ([]model.User, error) {
+	return s.userRepo.FindAllUsers()
 }

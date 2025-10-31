@@ -1,10 +1,12 @@
+// src/pages/admin/AdminManageTests.jsx
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // <-- Import Link
 import axios from "@/api/axiosConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2 } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, FilePenLine } from "lucide-react"; // <-- Import FilePenLine
 
 const AdminManageTests = () => {
     const [tests, setTests] = useState([]);
@@ -33,7 +35,8 @@ const AdminManageTests = () => {
         if (!window.confirm("Apakah Anda yakin ingin menghapus tes ini?")) return;
 
         try {
-            await axios.delete(`/tests/${testId}`);
+            // Panggil API Delete
+            await axios.delete(`/tests/${testId}`); //
             toast({
                 title: "Sukses",
                 description: "Tes berhasil dihapus.",
@@ -53,9 +56,11 @@ const AdminManageTests = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-foreground">Manage Tests</h1>
-                <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Buat Tes Baru
+                <Button asChild>
+                    <Link to="/admin/tests/new">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Buat Tes Baru
+                    </Link>
                 </Button>
             </div>
 
@@ -69,6 +74,7 @@ const AdminManageTests = () => {
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-lg line-clamp-1">{test.title}</CardTitle>
+                                    {/* Gunakan 'test.is_premium' sesuai data dari BE */}
                                     <Badge variant={test.is_premium ? "secondary" : "outline"}>
                                         {test.is_premium ? "Premium" : "Free"}
                                     </Badge>
@@ -85,13 +91,21 @@ const AdminManageTests = () => {
                                 </p>
                             </CardContent>
                             <CardFooter className="flex gap-2">
-                                <Button variant="outline" size="sm" className="flex-1">
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit
+                                {/* --- PERBAIKAN: Tombol Edit --- */}
+                                <Button variant="outline" size="sm" className="flex-1" asChild>
+                                    <Link to={`/admin/tests/edit/${test.id}`}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Edit
+                                    </Link>
                                 </Button>
-                                <Button variant="outline" size="sm" className="flex-1">
-                                    Manage Questions
+                                {/* --- PERBAIKAN: Tombol Manage Questions --- */}
+                                <Button variant="outline" size="sm" className="flex-1" asChild>
+                                    <Link to={`/admin/questions/${test.id}`}>
+                                        <FilePenLine className="h-4 w-4 mr-2" />
+                                        Soal
+                                    </Link>
                                 </Button>
+                                {/* --- AKHIR PERBAIKAN --- */}
                                 <Button
                                     variant="destructive"
                                     size="sm"

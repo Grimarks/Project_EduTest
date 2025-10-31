@@ -3,14 +3,15 @@ package repository
 import (
 	"github.com/Grimarks/Project-TryOutOnline-GDGoC/internal/model"
 	"gorm.io/gorm"
-	 "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 type UserRepository interface {
 	CreateUser(user *model.User) error
 	FindUserByEmail(email string) (*model.User, error)
 	FindUserByID(userID uuid.UUID) (*model.User, error)
-	UpdatePremiumStatus(userID uuid.UUID, isPremium bool) error // <-- PASTIKAN BARIS INI ADA
+	UpdatePremiumStatus(userID uuid.UUID, isPremium bool) error
+	FindAllUsers() ([]model.User, error) // <-- DITAMBAHKAN
 }
 
 type userRepository struct {
@@ -35,14 +36,21 @@ func (r *userRepository) FindUserByEmail(email string) (*model.User, error) {
 }
 
 func (r *userRepository) FindUserByID(userID uuid.UUID) (*model.User, error) {
-    var user model.User
-    err := r.db.Where("id = ?", userID).First(&user).Error
-    if err != nil {
-        return nil, err
-    }
-    return &user, nil
+	var user model.User
+	err := r.db.Where("id = ?", userID).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (r *userRepository) UpdatePremiumStatus(userID uuid.UUID, isPremium bool) error {
 	return r.db.Model(&model.User{}).Where("id = ?", userID).Update("is_premium", isPremium).Error
+}
+
+// --- FUNGSI BARU UNTUK AMBIL SEMUA USER ---
+func (r *userRepository) FindAllUsers() ([]model.User, error) {
+	var users []model.User
+	err := r.db.Order("created_at desc").Find(&users).Error
+	return users, err
 }

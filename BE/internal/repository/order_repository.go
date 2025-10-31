@@ -11,6 +11,7 @@ type OrderRepository interface {
 	FindByID(id uuid.UUID) (*model.Order, error)
 	Update(order *model.Order) error
 	FindByUserID(userID uuid.UUID) ([]model.Order, error)
+	FindAll() ([]model.Order, error) // <-- DITAMBAHKAN
 }
 
 type orderRepository struct {
@@ -38,5 +39,11 @@ func (r *orderRepository) Update(order *model.Order) error {
 func (r *orderRepository) FindByUserID(userID uuid.UUID) ([]model.Order, error) {
 	var orders []model.Order
 	err := r.db.Where("user_id = ?", userID).Find(&orders).Error
+	return orders, err
+}
+
+func (r *orderRepository) FindAll() ([]model.Order, error) {
+	var orders []model.Order
+	err := r.db.Preload("User").Order("created_at desc").Find(&orders).Error
 	return orders, err
 }

@@ -13,6 +13,7 @@ type OrderService interface {
 	UploadPaymentProof(orderID, fileURL string) (*model.Order, error)
 	VerifyOrder(orderID string) error
 	GetOrdersByUserID(userID string) ([]model.Order, error)
+	GetAllOrders() ([]model.Order, error) // <-- DITAMBAHKAN
 }
 
 type orderService struct {
@@ -26,9 +27,9 @@ func NewOrderService(orderRepo repository.OrderRepository, userRepo repository.U
 
 // DTO untuk request pembuatan order
 type CreateOrderRequest struct {
-	ItemType string    `json:"item_type" validate:"required"` // "test" or "class"
-	ItemID   string    `json:"item_id" validate:"required,uuid"`
-	Amount   float64   `json:"amount" validate:"required,gt=0"`
+	ItemType string  `json:"item_type" validate:"required"`     // "test" atau "class"
+	ItemID   string  `json:"item_id" validate:"required,uuid"`
+	Amount   float64 `json:"amount" validate:"required,gt=0"`
 }
 
 // Fungsi Kunci 1: Membuat Order
@@ -101,4 +102,9 @@ func (s *orderService) GetOrdersByUserID(userID string) ([]model.Order, error) {
 		return nil, errors.New("invalid user id format")
 	}
 	return s.orderRepo.FindByUserID(userUUID)
+}
+
+// --- FUNGSI BARU UNTUK ADMIN MELIHAT SEMUA ORDER ---
+func (s *orderService) GetAllOrders() ([]model.Order, error) {
+	return s.orderRepo.FindAll()
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/Grimarks/Project-TryOutOnline-GDGoC/internal/model"
 	"github.com/Grimarks/Project-TryOutOnline-GDGoC/internal/service"
-	"github.com/Grimarks/Project-TryOutOnline-GDGoC/pkg/jwt" 
+	"github.com/Grimarks/Project-TryOutOnline-GDGoC/pkg/jwt"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
@@ -123,6 +123,35 @@ func (h *AuthHandler) GetMe(c *fiber.Ctx) error {
 		Email:     user.Email,
 		IsPremium: user.IsPremium,
 		Role:      user.Role,
+	}
+
+	return c.JSON(response)
+}
+
+// --- FUNGSI BARU UNTUK MENGAMBIL SEMUA USER ---
+func (h *AuthHandler) GetAllUsers(c *fiber.Ctx) error {
+	users, err := h.authService.GetAllUsers()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve users"})
+	}
+
+	type UserResponse struct {
+		ID        uuid.UUID `json:"id"`
+		Name      string    `json:"name"`
+		Email     string    `json:"email"`
+		IsPremium bool      `json:"is_premium"`
+		Role      string    `json:"role"`
+	}
+
+	response := make([]UserResponse, len(users))
+	for i, user := range users {
+		response[i] = UserResponse{
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			IsPremium: user.IsPremium,
+			Role:      user.Role,
+		}
 	}
 
 	return c.JSON(response)

@@ -22,6 +22,8 @@ import AdminManageClasses from "./pages/admin/AdminManageClasses.jsx";
 import AdminManageQuestions from "./pages/admin/AdminManageQuestions.jsx";
 import AdminManageUsers from "./pages/admin/AdminManageUsers.jsx";
 import AdminManageOrders from "./pages/admin/AdminManageOrders.jsx";
+import AdminTestForm from "./pages/admin/AdminTestForm.jsx";
+import AdminQuestionForm from "./pages/admin/AdminQuestionForm.jsx";
 
 const queryClient = new QueryClient();
 
@@ -49,8 +51,12 @@ const App = () => {
                                         <Route path="/admin" element={<AdminLayout />}>
                                             <Route path="dashboard" element={<AdminDashboard />} />
                                             <Route path="tests" element={<AdminManageTests />} />
+                                            <Route path="tests/new" element={<AdminTestForm />} />
+                                            <Route path="tests/edit/:testId" element={<AdminTestForm />} />
+                                            <Route path="questions/:testId" element={<AdminManageQuestions />} />
+                                            <Route path="questions/:testId/new" element={<AdminQuestionForm />} />
+                                            <Route path="questions/:testId/edit/:questionId" element={<AdminQuestionForm />} />
                                             <Route path="classes" element={<AdminManageClasses />} />
-                                            <Route path="questions" element={<AdminManageQuestions />} />
                                             <Route path="users" element={<AdminManageUsers />} />
                                             <Route path="orders" element={<AdminManageOrders />} />
                                         </Route>

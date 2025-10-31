@@ -81,3 +81,18 @@ func (h *OrderHandler) GetOrdersByUserID(c *fiber.Ctx) error {
 	}
 	return c.JSON(orders)
 }
+
+// --- FUNGSI BARU UNTUK ADMIN MELIHAT SEMUA ORDER ---
+func (h *OrderHandler) GetAllOrders(c *fiber.Ctx) error {
+	// Cek apakah user admin (meskipun sudah dicek di middleware, ini best practice)
+	userRole, _ := c.Locals("userRole").(string)
+	if userRole != "admin" {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied"})
+	}
+
+	orders, err := h.service.GetAllOrders()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(orders)
+}
