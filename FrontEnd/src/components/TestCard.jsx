@@ -24,7 +24,7 @@ const TestCard = ({ test }) => {
         duration: test.duration || 30,
         questionCount: test.questionCount || test.questions?.length || 0,
         isPremium: test.isPremium ?? test.is_premium ?? false,
-        price: test.price || 50000, // harga default untuk premium
+        price: test.price || 50000,
     };
 
     const getDifficultyColor = (difficulty) => {
@@ -34,7 +34,7 @@ const TestCard = ({ test }) => {
                 baseClass = "bg-secondary";
                 break;
             case "Medium":
-                baseClass = "bg-yellow-500"; // accent kuning
+                baseClass = "bg-yellow-500";
                 break;
             case "Hard":
                 baseClass = "bg-destructive";
@@ -52,7 +52,6 @@ const TestCard = ({ test }) => {
             minimumFractionDigits: 0,
         }).format(price);
 
-    // --- LOGIKA UNTUK BUTTON & LINK DINAMIS ---
     let buttonLink = `/test/${normalizedTest.id}`;
     let buttonText = "Start Test";
     let buttonVariant = "default";
@@ -123,7 +122,7 @@ const TestCard = ({ test }) => {
                 <Button
                     asChild
                     variant={buttonVariant}
-                    className="w-full"
+                    className="w-full hover:bg-green-400"
                 >
                     <Link to={buttonLink}>{buttonText}</Link>
                 </Button>

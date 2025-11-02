@@ -63,6 +63,11 @@ const Navbar = () => {
                     <div className="hidden md:flex items-center space-x-4">
                         {isLoggedIn ? (
                             <>
+                                <span
+                                    className="text-sm text-muted-foreground">
+                                    Hi, {user?.name}
+                                </span>
+
                                 {user?.role === 'admin' && (
                                     <Button variant="outline" size="sm" asChild>
                                         <Link to="/admin/dashboard" className="text-accent hover:text-accent-foreground">

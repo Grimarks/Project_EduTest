@@ -33,8 +33,9 @@ const Home = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const response = await axios.get("/tests?limit=3");
-                setFeaturedTests(response.data || []);
+                // Ambil 3 tes saja untuk ditampilkan di Home
+                const response = await axios.get("/tests");
+                setFeaturedTests(response.data?.slice(0, 3) || []);
             } catch (err) {
                 console.error("Failed to fetch featured tests:", err);
                 setError("Could not load featured tests.");
@@ -92,7 +93,7 @@ const Home = () => {
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="space-y-8 animate-slide-up">
+                        <div className="space-y-8"> {/* Hapus animate-slide-up jika ada */}
                             <div className="space-y-4">
                                 <Badge className="bg-primary-glow text-primary-foreground hover:bg-primary-glow/90">
                                     🎯 #1 Online Test Platform
@@ -122,8 +123,9 @@ const Home = () => {
                             </div>
                         </div>
 
-                        <div className="hidden lg:block animate-float">
-                            <Card className="bg-white/10 backdrop-blur-md border-white/20 shadow-glow">
+                        {/* --- KARTU YANG DIANIMASIKAN --- */}
+                        <div className="hidden lg:block">
+                            <Card className="bg-white/10 backdrop-blur-md border-white/20 shadow-glow animate-float">
                                 <CardHeader>
                                     <CardTitle className="text-white">Quick Stats</CardTitle>
                                 </CardHeader>
@@ -140,6 +142,7 @@ const Home = () => {
                                 </CardContent>
                             </Card>
                         </div>
+                        {/* --- AKHIR KARTU --- */}
                     </div>
                 </div>
             </section>

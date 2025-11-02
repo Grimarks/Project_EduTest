@@ -5,6 +5,20 @@
 @tailwind utilities;
 
 @layer utilities {
+        /*== ANIMEASI ANJAAY == */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+
         /* === COLORS === */
         .bg-background {
             @apply bg-[hsl(210,17%,98%)];
