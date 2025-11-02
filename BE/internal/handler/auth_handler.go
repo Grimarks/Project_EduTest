@@ -18,6 +18,7 @@ type AuthHandler struct {
 	validate    *validator.Validate
 }
 
+// ... (NewAuthHandler, RegisterRequest, LoginRequest, Register, Login, GetMe, GetAllUsers, Logout, RefreshToken tidak berubah) ...
 func NewAuthHandler(authService service.AuthService) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
@@ -128,7 +129,6 @@ func (h *AuthHandler) GetMe(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
-// --- FUNGSI BARU UNTUK MENGAMBIL SEMUA USER ---
 func (h *AuthHandler) GetAllUsers(c *fiber.Ctx) error {
 	users, err := h.authService.GetAllUsers()
 	if err != nil {
@@ -156,6 +156,53 @@ func (h *AuthHandler) GetAllUsers(c *fiber.Ctx) error {
 
 	return c.JSON(response)
 }
+// --- FUNGSI BARU UNTUK UPDATE USER ---
+type UpdateUserRequest struct {
+	Role      string `json:"role" validate:"required,oneof=admin user"`
+	IsPremium bool   `json:"is_premium" validate:"boolean"`
+}
+
+func (h *AuthHandler) UpdateUser(c *fiber.Ctx) error {
+	userID := c.Params("id")
+
+	var req UpdateUserRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})
+	}
+
+	// Validasi manual untuk 'is_premium' karena 'validate:"boolean"' tidak menangkap 'false' dengan benar
+	// Cek apakah field 'is_premium' ada di body
+	var raw map[string]interface{}
+	if err := c.BodyParser(&raw); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse raw JSON"})
+	}
+	_, isPremiumFieldPresent := raw["is_premium"]
+	if !isPremiumFieldPresent {
+		// Jika 'is_premium' tidak ada, validasi struct akan gagal jika 'boolean' diperlukan
+        // Kita set default 'req.IsPremium' sudah false, jadi kita hanya perlu validasi role
+         if err := h.validate.StructExcept(req, "IsPremium"); err != nil {
+             return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Validation failed", "details": err.Error()})
+         }
+	} else {
+        // Jika field ada, validasi semua
+        if err := h.validate.Struct(req); err != nil {
+		    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Validation failed", "details": err.Error()})
+	    }
+    }
+
+
+	updatedUser, err := h.authService.UpdateUserRoleAndPremium(userID, req.Role, req.IsPremium)
+	if err != nil {
+		if err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(updatedUser)
+}
+// --- AKHIR FUNGSI BARU ---
+
 
 func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 	userID, ok := c.Locals("userID").(string)

@@ -1,18 +1,20 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "@/api/axiosConfig";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
 import { Badge } from "../components/ui/badge";
-import { Clock, ChevronLeft, ChevronRight, Flag } from "lucide-react";
-import { useAuth } from "../context/UseAuth"; // <-- DITAMBAHKAN
+import { Clock, ChevronLeft, ChevronRight, Flag, ShieldAlert } from "lucide-react";
+import { useAuth } from "../context/UseAuth";
+import { useToast } from "../hooks/use-toast";
 
 const TakeTest = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
-    const location = useLocation(); // <-- DITAMBAHKAN
-    const { isLoggedIn, isLoading: isAuthLoading } = useAuth(); // <-- DITAMBAHKAN
+    const location = useLocation();
+    const { toast } = useToast(); // Panggil hook toast
+    const { user, isLoggedIn, isLoading: isAuthLoading } = useAuth();
 
     const [test, setTest] = useState(null);
     const [questions, setQuestions] = useState([]);
@@ -22,16 +24,13 @@ const TakeTest = () => {
     const [answers, setAnswers] = useState({});
     const [timeLeft, setTimeLeft] = useState(0);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [startTime, setStartTime] = useState(null);
 
-    // --- BLOK PERBAIKAN OTENTIKASI ---
+    // --- PERBAIKAN TIMER: Gunakan useRef untuk menyimpan ID interval ---
+    const timerRef = useRef(null);
+
+    // --- BLOK PERBAIKAN OTENTIKASI (Sudah ada, tapi kita tambahkan toast) ---
     useEffect(() => {
-        // Cek status login SEBELUM mengambil data tes
         if (!isAuthLoading && !isLoggedIn) {
-            // Jika loading auth selesai dan user TIDAK login,
-            // redirect ke halaman login.
-            // Kita simpan lokasi saat ini (location.pathname)
-            // agar setelah login bisa kembali ke halaman tes ini.
             toast({
                 title: "Akses Ditolak",
                 description: "Anda harus login untuk mengambil tes.",
@@ -39,12 +38,11 @@ const TakeTest = () => {
             });
             navigate("/login", { state: { from: location.pathname } });
         }
-    }, [isAuthLoading, isLoggedIn, navigate, location.pathname]);
+    }, [isAuthLoading, isLoggedIn, navigate, location.pathname, toast]);
     // --- AKHIR BLOK PERBAIKAN ---
 
     useEffect(() => {
-        // Jangan fetch data jika auth masih loading atau jika user tidak login
-        if (isAuthLoading || !isLoggedIn) return; // <-- DITAMBAHKAN
+        if (isAuthLoading || !isLoggedIn) return;
 
         const fetchTestData = async () => {
             setIsLoading(true);
@@ -52,9 +50,23 @@ const TakeTest = () => {
             try {
                 const testResponse = await axios.get(`/tests/${testId}`);
                 const fetchedTest = { ...testResponse.data, id: String(testResponse.data.id) };
+
+                // --- PERBAIKAN AKSES PREMIUM ---
+                // Cek apakah tes ini premium dan user bukan premium
+                if (fetchedTest.is_premium && !user?.is_premium) {
+                    setError("Tes ini khusus untuk anggota premium.");
+                    toast({
+                        title: "Akses Ditolak",
+                        description: "Anda harus menjadi anggota premium untuk mengambil tes ini.",
+                        variant: "destructive",
+                    });
+                    setIsLoading(false);
+                    return; // Hentikan fetching
+                }
+                // --- AKHIR PERBAIKAN ---
+
                 setTest(fetchedTest);
-                setTimeLeft(fetchedTest.duration * 60); // Durasi dari backend dalam menit
-                setStartTime(Date.now());
+                setTimeLeft(fetchedTest.duration * 60);
 
                 const questionsResponse = await axios.get(`/questions/test/${testId}`);
                 const formattedQuestions = questionsResponse.data.map((q) => ({
@@ -74,7 +86,40 @@ const TakeTest = () => {
         };
 
         fetchTestData();
-    }, [testId, isAuthLoading, isLoggedIn]); // <-- Tambahkan dependency
+    }, [testId, isAuthLoading, isLoggedIn, user]);
+
+    // --- PERBAIKAN TIMER: useEffect baru untuk countdown ---
+    useEffect(() => {
+        // Hanya jalan jika tes sudah ada dan waktu > 0
+        if (!test || timeLeft <= 0 || isSubmitted) {
+            clearInterval(timerRef.current);
+            return;
+        }
+
+        timerRef.current = setInterval(() => {
+            setTimeLeft((prevTime) => {
+                if (prevTime <= 1) {
+                    clearInterval(timerRef.current);
+                    // Waktu habis, auto-submit
+                    toast({
+                        title: "Waktu Habis!",
+                        description: "Hasil tes Anda sedang dikirim...",
+                        variant: "destructive",
+                    });
+                    handleSubmit(true); // Kirim flag autoSubmit
+                    return 0;
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+
+        // Cleanup function
+        return () => {
+            clearInterval(timerRef.current);
+        };
+    }, [test, timeLeft, isSubmitted, toast]); // Tambahkan dependensi
+    // --- AKHIR PERBAIKAN TIMER ---
+
 
     const handleAnswerSelect = (questionId, optionIndex) => {
         setAnswers({ ...answers, [questionId]: optionIndex });
@@ -88,14 +133,24 @@ const TakeTest = () => {
 
     const handlePrevious = () => {
         if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
+            // BUGFIX: Seharusnya ke index sebelumnya, bukan +1
+            setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
     };
 
-    const handleSubmit = async () => {
+    // Modifikasi handleSubmit untuk menerima flag autoSubmit
+    const handleSubmit = async (isAutoSubmit = false) => {
         if (isSubmitted) return;
+
+        if (!isAutoSubmit) {
+            if (!window.confirm("Apakah Anda yakin ingin menyelesaikan tes ini?")) {
+                return;
+            }
+        }
+
         setIsSubmitted(true);
-        // Pastikan durasi dalam detik (backend mungkin mengirim menit)
+        clearInterval(timerRef.current); // Hentikan timer
+
         const totalDurationSeconds = test ? test.duration * 60 : 0;
         const timeSpent = totalDurationSeconds > 0 ? totalDurationSeconds - timeLeft : 0;
 
@@ -120,7 +175,7 @@ const TakeTest = () => {
                     totalQuestions: response.data.total_questions,
                     timeSpent: response.data.time_spent,
                     answers,
-                    questions, // Pastikan questions dikirim ke halaman hasil
+                    questions,
                 },
             });
         } catch (error) {
@@ -144,21 +199,23 @@ const TakeTest = () => {
         if (!test || !test.duration) return "text-foreground";
         const percentageLeft = (timeLeft / (test.duration * 60)) * 100;
         if (percentageLeft <= 10) return "text-destructive";
-        if (percentageLeft <= 25) return "text-accent";
+        if (percentageLeft <= 25) return "text-yellow-500"; // Ganti accent
         return "text-foreground";
     };
 
-    // Tampilkan loading jika data tes ATAU status auth sedang dimuat
     if (isLoading || isAuthLoading) return <div className="p-8 text-center">Loading test...</div>;
 
     if (error) return (
-        <div className="p-8 text-center text-destructive">
-            {error}
+        <div className="p-8 text-center text-destructive flex flex-col items-center gap-4">
+            <ShieldAlert className="h-16 w-16" />
+            <p className="text-xl">{error}</p>
             <Button onClick={() => navigate("/tests")} className="mt-4">Back to Tests</Button>
+            {error.includes("premium") && (
+                <Button onClick={() => navigate("/premium")} variant="secondary">Upgrade to Premium</Button>
+            )}
         </div>
     );
 
-    // Jangan render apapun jika user tidak login (karena akan di-redirect)
     if (!isLoggedIn) return null;
 
     if (!test || questions.length === 0) return <div className="p-8 text-center">Test data is incomplete.</div>;
@@ -170,7 +227,7 @@ const TakeTest = () => {
     return (
         <div className="min-h-screen bg-background py-6">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* ... (sisa JSX tidak berubah) ... */}
+                {/* Header */}
                 <div className="mb-6">
                     <Card className="shadow-card">
                         <CardHeader>
@@ -195,6 +252,7 @@ const TakeTest = () => {
                     </Card>
                 </div>
 
+                {/* Question Card */}
                 <Card className="mb-6 shadow-card">
                     <CardHeader>
                         <CardTitle className="text-lg leading-relaxed">{currentQuestion.question_text}</CardTitle>
@@ -225,12 +283,14 @@ const TakeTest = () => {
                     </CardContent>
                 </Card>
 
+                {/* Navigation */}
                 <div className="flex items-center justify-between">
                     <Button variant="outline" onClick={handlePrevious} disabled={currentQuestionIndex === 0}>
                         <ChevronLeft className="h-4 w-4 mr-2" /> Previous
                     </Button>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={handleSubmit} className="text-accent hover:text-accent-foreground">
+                        {/* Panggil handleSubmit tanpa argumen saat diklik manual */}
+                        <Button variant="destructive" onClick={() => handleSubmit(false)}>
                             <Flag className="h-4 w-4 mr-2" /> Submit Test
                         </Button>
                     </div>
@@ -239,6 +299,7 @@ const TakeTest = () => {
                     </Button>
                 </div>
 
+                {/* Navigator Grid */}
                 <Card className="mt-6 shadow-card">
                     <CardHeader>
                         <CardTitle className="text-lg">Question Navigator</CardTitle>

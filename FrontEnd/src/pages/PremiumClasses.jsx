@@ -16,7 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../components/ui/select";
-import { Clock, User, Star, BookOpen, CheckCircle } from "lucide-react";
+import { Clock, User, Star, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/UseAuth";
 
@@ -26,7 +26,7 @@ const PremiumClasses = () => {
     const [error, setError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [categories, setCategories] = useState(["All"]);
-    const { isLoggedIn } = useAuth();
+    const { user, isLoggedIn } = useAuth(); // <-- Ambil user dan status login
 
     useEffect(() => {
         const fetchClasses = async () => {
@@ -37,16 +37,15 @@ const PremiumClasses = () => {
                 const formattedClasses = response.data.map((cls) => ({
                     ...cls,
                     id: String(cls.id),
+                    price: cls.price || 150000,
                     features: cls.features || [
-                        "Feature 1",
-                        "Feature 2",
-                        "Feature 3",
+                        "Video Pembelajaran HD",
+                        "Live Q&A Mingguan",
+                        "Studi Kasus",
                     ],
                 }));
 
                 setClasses(formattedClasses);
-
-                // Buat daftar kategori unik dari data API
                 const uniqueCategories = [
                     ...new Set(
                         formattedClasses.map((c) => c.category || "General")
@@ -85,8 +84,7 @@ const PremiumClasses = () => {
                         Premium <span className="text-primary">Classes</span>
                     </h1>
                     <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-                        Unlock your potential with expert-led courses designed
-                        to help you excel.
+                        Unlock your potential with expert-led courses designed to help you excel.
                     </p>
                 </div>
             </section>
@@ -99,7 +97,6 @@ const PremiumClasses = () => {
                             Available Classes ({filteredClasses.length})
                         </h2>
 
-                        {/* Filter Kategori Dinamis */}
                         <Select
                             value={selectedCategory}
                             onValueChange={setSelectedCategory}
@@ -111,10 +108,7 @@ const PremiumClasses = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 {categories.map((category) => (
-                                    <SelectItem
-                                        key={category}
-                                        value={category}
-                                    >
+                                    <SelectItem key={category} value={category}>
                                         {category}
                                     </SelectItem>
                                 ))}
@@ -128,9 +122,7 @@ const PremiumClasses = () => {
             <section className="px-4 pb-16">
                 <div className="max-w-7xl mx-auto">
                     {isLoading && (
-                        <p className="text-center text-muted-foreground">
-                            Loading classes...
-                        </p>
+                        <p className="text-center text-muted-foreground">Loading classes...</p>
                     )}
                     {error && (
                         <p className="text-center text-destructive">{error}</p>
@@ -140,8 +132,22 @@ const PremiumClasses = () => {
                         <>
                             {filteredClasses.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {filteredClasses.map(
-                                        (premiumClass, index) => (
+                                    {filteredClasses.map((premiumClass, index) => {
+                                        // --- LOGIKA TOMBOL BERDASARKAN STATUS USER ---
+                                        let buttonLink = `/order/class/${premiumClass.id}`;
+                                        let buttonText = "Enroll Now";
+                                        let buttonVariant = "default";
+
+                                        if (!isLoggedIn) {
+                                            buttonLink = "/login";
+                                            buttonText = "Login to Enroll";
+                                        } else if (user?.is_premium) {
+                                            buttonLink = "/dashboard";
+                                            buttonText = "View Class (Premium)";
+                                            buttonVariant = "outline";
+                                        }
+
+                                        return (
                                             <Card
                                                 key={premiumClass.id}
                                                 className="group hover:shadow-hover transition-smooth animate-slide-up bg-gradient-card border-border/50"
@@ -151,16 +157,21 @@ const PremiumClasses = () => {
                                             >
                                                 <CardHeader className="space-y-3">
                                                     <div className="aspect-video rounded-lg bg-gradient-hero flex items-center justify-center overflow-hidden">
-                                                        <BookOpen className="h-12 w-12 text-primary-foreground" />
+                                                        {premiumClass.image_url ? (
+                                                            <img
+                                                                src={premiumClass.image_url}
+                                                                alt={premiumClass.title}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="bg-muted h-full w-full flex items-center justify-center text-muted-foreground text-sm">
+                                                                No Image
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="flex items-start justify-between">
-                                                        <Badge
-                                                            variant="outline"
-                                                            className="text-xs"
-                                                        >
-                                                            {
-                                                                premiumClass.category
-                                                            }
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {premiumClass.category}
                                                         </Badge>
                                                         <Badge className="bg-accent text-accent-foreground">
                                                             Premium
@@ -170,9 +181,7 @@ const PremiumClasses = () => {
                                                         {premiumClass.title}
                                                     </CardTitle>
                                                     <p className="text-sm text-muted-foreground line-clamp-2">
-                                                        {
-                                                            premiumClass.description
-                                                        }
+                                                        {premiumClass.description || "No description available."}
                                                     </p>
                                                 </CardHeader>
 
@@ -180,19 +189,11 @@ const PremiumClasses = () => {
                                                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                                                         <div className="flex items-center gap-1">
                                                             <User className="h-4 w-4" />
-                                                            <span>
-                                                                {
-                                                                    premiumClass.instructor
-                                                                }
-                                                            </span>
+                                                            <span>{premiumClass.instructor}</span>
                                                         </div>
                                                         <div className="flex items-center gap-1">
                                                             <Clock className="h-4 w-4" />
-                                                            <span>
-                                                                {
-                                                                    premiumClass.duration
-                                                                }
-                                                            </span>
+                                                            <span>{premiumClass.duration || "Self-paced"}</span>
                                                         </div>
                                                     </div>
 
@@ -201,65 +202,37 @@ const PremiumClasses = () => {
                                                             What you'll learn:
                                                         </h4>
                                                         <ul className="space-y-1">
-                                                            {premiumClass.features
-                                                                .slice(0, 3)
-                                                                .map(
-                                                                    (
-                                                                        feature,
-                                                                        idx
-                                                                    ) => (
-                                                                        <li
-                                                                            key={
-                                                                                idx
-                                                                            }
-                                                                            className="flex items-center gap-2 text-xs text-muted-foreground"
-                                                                        >
-                                                                            <CheckCircle className="h-3 w-3 text-accent flex-shrink-0" />
-                                                                            <span>
-                                                                                {
-                                                                                    feature
-                                                                                }
-                                                                            </span>
-                                                                        </li>
-                                                                    )
-                                                                )}
+                                                            {premiumClass.features.slice(0, 3).map((feature, idx) => (
+                                                                <li
+                                                                    key={idx}
+                                                                    className="flex items-center gap-2 text-xs text-muted-foreground"
+                                                                >
+                                                                    <CheckCircle className="h-3 w-3 text-accent flex-shrink-0" />
+                                                                    <span>{feature}</span>
+                                                                </li>
+                                                            ))}
                                                         </ul>
                                                     </div>
 
                                                     <div className="flex items-center justify-between pt-2 border-t border-border">
                                                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                                             <Star className="h-4 w-4 fill-accent text-accent" />
-                                                            <span>
-                                                                4.9 (89 reviews)
-                                                            </span>
+                                                            <span>4.9 (89 reviews)</span>
                                                         </div>
                                                         <span className="text-lg font-bold text-accent">
-                                                            {formatPrice(
-                                                                premiumClass.price
-                                                            )}
+                                                            {formatPrice(premiumClass.price)}
                                                         </span>
                                                     </div>
                                                 </CardContent>
 
                                                 <CardFooter>
-                                                    {/* Tombol Enroll: menyesuaikan login */}
-                                                    <Button asChild className="w-full">
-                                                        <Link
-                                                            to={
-                                                                isLoggedIn
-                                                                    ? `/order/class/${premiumClass.id}`
-                                                                    : "/login"
-                                                            }
-                                                        >
-                                                            {isLoggedIn
-                                                                ? "Enroll Now"
-                                                                : "Login to Enroll"}
-                                                        </Link>
+                                                    <Button asChild className="w-full" variant={buttonVariant}>
+                                                        <Link to={buttonLink}>{buttonText}</Link>
                                                     </Button>
                                                 </CardFooter>
                                             </Card>
-                                        )
-                                    )}
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <p className="text-center text-muted-foreground">
@@ -278,8 +251,7 @@ const PremiumClasses = () => {
                         Ready to Transform Your Learning?
                     </h2>
                     <p className="text-lg text-primary-foreground/90 mb-8">
-                        Join thousands of students who have accelerated their
-                        journey with our premium classes.
+                        Join thousands of students who have accelerated their journey with our premium classes.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button size="lg" variant="secondary" asChild>

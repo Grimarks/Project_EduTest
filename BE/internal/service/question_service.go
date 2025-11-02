@@ -56,7 +56,7 @@ func (s *questionService) UpdateQuestion(id string, questionData *model.Question
 		return nil, err
 	}
 
-	existingQuestion.TestID = questionData.TestID // Pastikan TestID juga di-update
+	existingQuestion.TestID = questionData.TestID
 	existingQuestion.QuestionText = questionData.QuestionText
 	existingQuestion.Options = questionData.Options
 	existingQuestion.CorrectAnswer = questionData.CorrectAnswer

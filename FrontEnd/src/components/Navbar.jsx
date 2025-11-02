@@ -1,7 +1,7 @@
 // src/components/Navbar.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button.jsx";
-import { BookOpen, Menu, X, CircleUserRound, ShieldCheck } from "lucide-react"; // <-- Tambah ShieldCheck
+import { BookOpen, Menu, X, CircleUserRound, ShieldCheck, Receipt } from "lucide-react"; // <-- Tambah Receipt
 import { useState } from "react";
 import { useAuth } from "../context/UseAuth.jsx";
 
@@ -23,6 +23,11 @@ const Navbar = () => {
         { name: "Dashboard", path: "/dashboard" },
     ];
 
+    // Tambahkan My Orders jika user login
+    if (isLoggedIn) {
+        navItems.push({ name: "My Orders", path: "/my-orders" });
+    }
+
     const isActive = (path) => location.pathname === path;
 
     return (
@@ -37,6 +42,7 @@ const Navbar = () => {
                         <span className="text-xl font-bold text-foreground">EduTest+</span>
                     </Link>
 
+                    {/* Navigasi Desktop */}
                     <div className="hidden md:flex items-center space-x-8">
                         {navItems.map((item) => (
                             <Link
@@ -44,7 +50,7 @@ const Navbar = () => {
                                 to={item.path}
                                 className={`text-sm font-medium transition-smooth hover:text-primary ${
                                     isActive(item.path)
-                                        ? "text-primary border-b-2 border-primary" // (Perbaikan kecil)
+                                        ? "text-primary border-b-2 border-primary"
                                         : "text-muted-foreground"
                                 }`}
                             >
@@ -53,13 +59,10 @@ const Navbar = () => {
                         ))}
                     </div>
 
+                    {/* Auth Desktop */}
                     <div className="hidden md:flex items-center space-x-4">
                         {isLoggedIn ? (
                             <>
-                                <span className="text-sm text-muted-foreground">
-                                    Hi, {user?.name}
-                                </span>
-
                                 {user?.role === 'admin' && (
                                     <Button variant="outline" size="sm" asChild>
                                         <Link to="/admin/dashboard" className="text-accent hover:text-accent-foreground">
@@ -88,6 +91,7 @@ const Navbar = () => {
                         )}
                     </div>
 
+                    {/* Tombol Menu Mobile */}
                     <div className="md:hidden">
                         <Button
                             variant="ghost"
@@ -99,6 +103,7 @@ const Navbar = () => {
                     </div>
                 </div>
 
+                {/* Menu Mobile */}
                 {isMenuOpen && (
                     <div className="md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-card border-t border-border">
@@ -113,6 +118,8 @@ const Navbar = () => {
                                     }`}
                                     onClick={() => setIsMenuOpen(false)}
                                 >
+                                    {/* Icon untuk My Orders */}
+                                    {item.path === "/my-orders" && <Receipt className="h-4 w-4 mr-2 inline" />}
                                     {item.name}
                                 </Link>
                             ))}
@@ -154,6 +161,7 @@ const Navbar = () => {
                                         </Button>
                                     </>
                                 ) : (
+                                    // ... (tombol login/register mobile)
                                     <>
                                         <Button
                                             variant="ghost"

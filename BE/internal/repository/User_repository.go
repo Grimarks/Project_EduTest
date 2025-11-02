@@ -11,7 +11,8 @@ type UserRepository interface {
 	FindUserByEmail(email string) (*model.User, error)
 	FindUserByID(userID uuid.UUID) (*model.User, error)
 	UpdatePremiumStatus(userID uuid.UUID, isPremium bool) error
-	FindAllUsers() ([]model.User, error) // <-- DITAMBAHKAN
+	FindAllUsers() ([]model.User, error)
+	UpdateUser(user *model.User) error // <-- TAMBAHKAN INI
 }
 
 type userRepository struct {
@@ -48,9 +49,12 @@ func (r *userRepository) UpdatePremiumStatus(userID uuid.UUID, isPremium bool) e
 	return r.db.Model(&model.User{}).Where("id = ?", userID).Update("is_premium", isPremium).Error
 }
 
-// --- FUNGSI BARU UNTUK AMBIL SEMUA USER ---
 func (r *userRepository) FindAllUsers() ([]model.User, error) {
 	var users []model.User
 	err := r.db.Order("created_at desc").Find(&users).Error
 	return users, err
+}
+
+func (r *userRepository) UpdateUser(user *model.User) error {
+	return r.db.Save(user).Error
 }

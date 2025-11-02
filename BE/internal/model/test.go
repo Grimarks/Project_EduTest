@@ -6,7 +6,6 @@ import (
 )
 
 type Test struct {
-    // --- TAMBAHKAN SEMUA TAG JSON DI BAWAH INI ---
     ID          uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
     Title       string    `gorm:"type:varchar(255);not null" json:"title"`
     Description string    `gorm:"type:text" json:"description"`
@@ -17,5 +16,4 @@ type Test struct {
     ImageURL    string    `gorm:"type:varchar(255)" json:"image_url"`
     CreatedAt   time.Time `json:"created_at"`
     UpdatedAt   time.Time `json:"updated_at"`
-    // --- AKHIR PERBAIKAN ---
 }

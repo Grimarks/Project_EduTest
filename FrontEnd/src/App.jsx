@@ -14,11 +14,14 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import Account from "./pages/Account.jsx";
+import OrderPage from "./pages/OrderPage.jsx";
+import MyOrders from "./pages/MyOrders.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import AdminLayout from "./components/AdminLayout.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminManageTests from "./pages/admin/AdminManageTests.jsx";
 import AdminManageClasses from "./pages/admin/AdminManageClasses.jsx";
+import AdminClassForm from "./pages/admin/AdminClassForm.jsx";
 import AdminManageQuestions from "./pages/admin/AdminManageQuestions.jsx";
 import AdminManageUsers from "./pages/admin/AdminManageUsers.jsx";
 import AdminManageOrders from "./pages/admin/AdminManageOrders.jsx";
@@ -46,6 +49,8 @@ const App = () => {
                                     <Route path="/login" element={<Login />} />
                                     <Route path="/register" element={<Register />} />
                                     <Route path="/account" element={<Account/>}/>
+                                    <Route path="/my-orders" element={<MyOrders />} />
+                                    <Route path="/order/:itemType/:itemId" element={<OrderPage />} />
 
                                     <Route element={<AdminRoute />}>
                                         <Route path="/admin" element={<AdminLayout />}>
@@ -57,6 +62,8 @@ const App = () => {
                                             <Route path="questions/:testId/new" element={<AdminQuestionForm />} />
                                             <Route path="questions/:testId/edit/:questionId" element={<AdminQuestionForm />} />
                                             <Route path="classes" element={<AdminManageClasses />} />
+                                            <Route path="classes/new" element={<AdminClassForm />} />
+                                            <Route path="classes/edit/:classId" element={<AdminClassForm />} />
                                             <Route path="users" element={<AdminManageUsers />} />
                                             <Route path="orders" element={<AdminManageOrders />} />
                                         </Route>

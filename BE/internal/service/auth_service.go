@@ -19,7 +19,8 @@ type AuthService interface {
 	GetMe(userID string) (*model.User, error)
 	Logout(userID string) error
 	GetRedisToken(userID string) (string, error)
-	GetAllUsers() ([]model.User, error) // <-- DITAMBAHKAN
+	GetAllUsers() ([]model.User, error)
+	UpdateUserRoleAndPremium(userID string, newRole string, isPremium bool) (*model.User, error) // <-- DITAMBAHKAN
 }
 
 type authService struct {
@@ -34,6 +35,7 @@ func NewAuthService(userRepo repository.UserRepository, redisClient *redis.Clien
 	}
 }
 
+// ... (Fungsi Register, Login, GetMe, Logout, GetRedisToken, GetAllUsers tidak berubah) ...
 func (s *authService) Register(user *model.User) error {
 	return s.userRepo.CreateUser(user)
 }
@@ -82,7 +84,31 @@ func (s *authService) GetRedisToken(userID string) (string, error) {
 	return val, nil
 }
 
-// --- FUNGSI BARU UNTUK AMBIL SEMUA USER!!!  ---
 func (s *authService) GetAllUsers() ([]model.User, error) {
 	return s.userRepo.FindAllUsers()
+}
+// --- FUNGSI BARU UNTUK UPDATE USER ---
+func (s *authService) UpdateUserRoleAndPremium(userID string, newRole string, isPremium bool) (*model.User, error) {
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID format")
+	}
+
+	user, err := s.userRepo.FindUserByID(userUUID)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// Validasi role
+	if newRole != "admin" && newRole != "user" {
+		return nil, errors.New("invalid role")
+	}
+
+	user.Role = newRole
+	user.IsPremium = isPremium
+
+	if err := s.userRepo.UpdateUser(user); err != nil {
+		return nil, err
+	}
+	return user, nil
 }

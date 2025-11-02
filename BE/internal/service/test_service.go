@@ -50,9 +50,15 @@ func (s *testService) UpdateTest(id string, testData *model.Test) (*model.Test, 
         return nil, err
     }
 
+    // --- PERBAIKAN: Melengkapi data update ---
     existingTest.Title = testData.Title
     existingTest.Description = testData.Description
-	//to be updated
+    existingTest.Category = testData.Category
+    existingTest.Difficulty = testData.Difficulty
+    existingTest.Duration = testData.Duration
+    existingTest.IsPremium = testData.IsPremium
+    existingTest.ImageURL = testData.ImageURL
+    // --- AKHIR PERBAIKAN ---
 
     err = s.repo.Update(existingTest)
     return existingTest, err

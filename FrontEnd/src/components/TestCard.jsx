@@ -4,14 +4,16 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/Card.jsx"; // Path diperjelas
-
-import { Badge } from "@/components/ui/badge.jsx"; // Path benar
-import { Button } from "@/components/ui/button.jsx"; // Path benar
+} from "@/components/ui/Card.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
+import { Button } from "@/components/ui/button.jsx";
 import { Clock, BookOpen, Star, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/UseAuth";
 
 const TestCard = ({ test }) => {
+    const { user } = useAuth(); // Cek status user (premium atau bukan)
+
     // Normalisasi data agar konsisten
     const normalizedTest = {
         id: String(test.id || test._id || Math.random()),
@@ -19,11 +21,10 @@ const TestCard = ({ test }) => {
         description: test.description || "No description available.",
         category: test.category || "General",
         difficulty: test.difficulty || "Unknown",
-        // Backend mengirim durasi dalam menit, bukan detik
         duration: test.duration || 30,
         questionCount: test.questionCount || test.questions?.length || 0,
         isPremium: test.isPremium ?? test.is_premium ?? false,
-        price: test.price || 0,
+        price: test.price || 50000, // harga default untuk premium
     };
 
     const getDifficultyColor = (difficulty) => {
@@ -33,7 +34,7 @@ const TestCard = ({ test }) => {
                 baseClass = "bg-secondary";
                 break;
             case "Medium":
-                baseClass = "bg-accent";
+                baseClass = "bg-yellow-500"; // accent kuning
                 break;
             case "Hard":
                 baseClass = "bg-destructive";
@@ -41,7 +42,6 @@ const TestCard = ({ test }) => {
             default:
                 baseClass = "bg-muted";
         }
-
         return `${baseClass} text-white`;
     };
 
@@ -51,6 +51,22 @@ const TestCard = ({ test }) => {
             currency: "IDR",
             minimumFractionDigits: 0,
         }).format(price);
+
+    // --- LOGIKA UNTUK BUTTON & LINK DINAMIS ---
+    let buttonLink = `/test/${normalizedTest.id}`;
+    let buttonText = "Start Test";
+    let buttonVariant = "default";
+
+    if (normalizedTest.isPremium) {
+        if (!user?.is_premium) {
+            buttonLink = `/order/test/${normalizedTest.id}`;
+            buttonText = "Buy Premium Access";
+            buttonVariant = "secondary";
+        } else {
+            buttonText = "Start Premium Test";
+            buttonVariant = "default";
+        }
+    }
 
     return (
         <Card className="group hover:shadow-hover transition-smooth animate-slide-up bg-gradient-card border-border/50">
@@ -67,7 +83,7 @@ const TestCard = ({ test }) => {
                 <CardTitle className="text-lg group-hover:text-primary transition-smooth">
                     {normalizedTest.title}
                     {normalizedTest.isPremium && (
-                        <Lock className="inline-block ml-2 h-4 w-4 text-accent" />
+                        <Lock className="inline-block ml-2 h-4 w-4 text-yellow-500" />
                     )}
                 </CardTitle>
 
@@ -88,17 +104,17 @@ const TestCard = ({ test }) => {
                     </div>
                 </div>
 
-                {normalizedTest.isPremium && normalizedTest.price > 0 && (
+                {normalizedTest.isPremium && (
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Price:</span>
-                        <span className="font-semibold text-accent">
+                        <span className="text-sm text-muted-foreground">Harga Akses:</span>
+                        <span className="font-semibold text-primary">
                             {formatPrice(normalizedTest.price)}
                         </span>
                     </div>
                 )}
 
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Star className="h-4 w-4 fill-accent text-accent" />
+                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                     <span>4.8 (124 reviews)</span>
                 </div>
             </CardContent>
@@ -106,12 +122,10 @@ const TestCard = ({ test }) => {
             <CardFooter>
                 <Button
                     asChild
-                    variant={normalizedTest.isPremium ? "secondary" : "default"}
+                    variant={buttonVariant}
                     className="w-full"
                 >
-                    <Link to={`/test/${normalizedTest.id}`}>
-                        {normalizedTest.isPremium ? "View Premium Test" : "Start Test"}
-                    </Link>
+                    <Link to={buttonLink}>{buttonText}</Link>
                 </Button>
             </CardFooter>
         </Card>

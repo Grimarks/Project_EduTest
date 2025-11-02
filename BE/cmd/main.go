@@ -16,35 +16,43 @@ func main() {
     db := config.InitDatabase()
     redisClient := config.InitRedis()
 
-    err := db.AutoMigrate(&model.User{}, &model.Test{}, &model.Question{}, &model.TestResult{}, &model.PremiumClass{}, &model.Order{})
+    err := db.AutoMigrate(
+        &model.User{},
+        &model.Test{},
+        &model.Question{},
+        &model.TestResult{},
+        &model.PremiumClass{},
+        &model.Order{},
+    )
     if err != nil {
         log.Fatal("Failed to migrate database:", err)
     }
 
+    // Repository
     userRepo := repository.NewUserRepository(db)
-    authService := service.NewAuthService(userRepo, redisClient)
-    authHandler := handler.NewAuthHandler(authService)
-
     testRepo := repository.NewTestRepository(db)
-    testService := service.NewTestService(testRepo)
-    testHandler := handler.NewTestHandler(testService)
-
     questionRepo := repository.NewQuestionRepository(db)
-    questionService := service.NewQuestionService(questionRepo)
-    questionHandler := handler.NewQuestionHandler(questionService)
-
     testResultRepo := repository.NewTestResultRepository(db)
-    testResultService := service.NewTestResultService(testResultRepo, questionRepo)
-    testResultHandler := handler.NewTestResultHandler(testResultService)
-
     premiumClassRepo := repository.NewPremiumClassRepository(db)
-    premiumClassService := service.NewPremiumClassService(premiumClassRepo)
-    premiumClassHandler := handler.NewPremiumClassHandler(premiumClassService)
-
     orderRepo := repository.NewOrderRepository(db)
+
+    // Service
+    authService := service.NewAuthService(userRepo, redisClient)
+    testService := service.NewTestService(testRepo)
+    questionService := service.NewQuestionService(questionRepo)
+    testResultService := service.NewTestResultService(testResultRepo, questionRepo)
+    premiumClassService := service.NewPremiumClassService(premiumClassRepo)
     orderService := service.NewOrderService(orderRepo, userRepo)
+
+    // Handler
+    authHandler := handler.NewAuthHandler(authService)
+    testHandler := handler.NewTestHandler(testService)
+    questionHandler := handler.NewQuestionHandler(questionService)
+    testResultHandler := handler.NewTestResultHandler(testResultService)
+    premiumClassHandler := handler.NewPremiumClassHandler(premiumClassService)
     orderHandler := handler.NewOrderHandler(orderService)
 
+    // App setup
     app := fiber.New()
     app.Use(logger.New())
 
@@ -57,15 +65,21 @@ func main() {
     app.Static("/uploads", "./public/uploads")
 
     api := app.Group("/api")
-    auth := api.Group("/auth")
 
+    // AUTH
+    auth := api.Group("/auth")
     auth.Post("/register", authHandler.Register)
     auth.Post("/login", authHandler.Login)
     auth.Post("/refresh-token", authHandler.RefreshToken)
     auth.Get("/me", handler.AuthMiddleware(), authHandler.GetMe)
     auth.Post("/logout", handler.AuthMiddleware(), authHandler.Logout)
-    auth.Get("/users", handler.AuthMiddleware(), handler.AdminMiddleware(), authHandler.GetAllUsers)
 
+    // Grup admin untuk user management
+    adminAuth := auth.Use(handler.AuthMiddleware(), handler.AdminMiddleware())
+    adminAuth.Get("/users", authHandler.GetAllUsers)
+    adminAuth.Put("/users/:id", authHandler.UpdateUser) // Tambahan dari versi benar
+
+    // TESTS
     tests := api.Group("/tests")
     tests.Get("/", testHandler.GetAllTests)
     tests.Get("/:id", testHandler.GetTestByID)
@@ -75,6 +89,7 @@ func main() {
     adminTests.Put("/:id", testHandler.UpdateTest)
     adminTests.Delete("/:id", testHandler.DeleteTest)
 
+    // QUESTIONS
     questions := api.Group("/questions")
     questions.Get("/test/:testId", questionHandler.GetQuestionsByTestID)
     questions.Get("/:id", handler.AuthMiddleware(), questionHandler.GetQuestionByID)
@@ -84,12 +99,15 @@ func main() {
     adminQuestions.Put("/:id", questionHandler.UpdateQuestion)
     adminQuestions.Delete("/:id", questionHandler.DeleteQuestion)
 
+    // TEST RESULTS
     results := api.Group("/test-results", handler.AuthMiddleware())
     results.Post("/", testResultHandler.SubmitTest)
     results.Get("/user/:userId", testResultHandler.GetResultsByUserID)
 
+    // FILE UPLOAD
     api.Post("/upload", handler.AuthMiddleware(), handler.UploadFile)
 
+    // PREMIUM CLASSES
     classes := api.Group("/premium-classes")
     classes.Get("/", premiumClassHandler.GetAllClasses)
     classes.Get("/:id", premiumClassHandler.GetClassByID)
@@ -99,6 +117,7 @@ func main() {
     adminClasses.Put("/:id", premiumClassHandler.UpdateClass)
     adminClasses.Delete("/:id", premiumClassHandler.DeleteClass)
 
+    // ORDERS
     orders := api.Group("/orders", handler.AuthMiddleware())
     orders.Post("/", orderHandler.CreateOrder)
     orders.Get("/user/:userId", orderHandler.GetOrdersByUserID)

@@ -20,20 +20,17 @@ func NewQuestionHandler(service service.QuestionService) *QuestionHandler {
 	}
 }
 
-// --- PERBAIKAN 1: Ubah tipe TestID menjadi string ---
 type QuestionRequest struct {
-	TestID        string    `json:"test_id" validate:"required,uuid"` // Ubah dari uuid.UUID
+	TestID        string    `json:"test_id" validate:"required,uuid"`
 	QuestionText  string    `json:"question_text" validate:"required"`
 	Options       string    `json:"options" validate:"required,json"`
 	CorrectAnswer int       `json:"correct_answer" validate:"gte=0"`
 	Explanation   string    `json:"explanation"`
 }
-// --- AKHIR PERBAIKAN 1 ---
 
 func (h *QuestionHandler) CreateQuestion(c *fiber.Ctx) error {
 	var req QuestionRequest
 	if err := c.BodyParser(&req); err != nil {
-		// Error "Invalid request body" yang kamu lihat berasal dari sini
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
@@ -41,15 +38,13 @@ func (h *QuestionHandler) CreateQuestion(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Validation failed", "details": err.Error()})
 	}
 
-	// --- PERBAIKAN 2: Parse string UUID secara manual ---
 	testUUID, err := uuid.Parse(req.TestID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid TestID format"})
 	}
-	// --- AKHIR PERBAIKAN 2 ---
 
 	question := &model.Question{
-		TestID:        testUUID, // Gunakan UUID yang sudah di-parse
+		TestID:        testUUID,
 		QuestionText:  req.QuestionText,
 		Options:       req.Options,
 		CorrectAnswer: req.CorrectAnswer,
@@ -70,7 +65,6 @@ func (h *QuestionHandler) GetQuestionsByTestID(c *fiber.Ctx) error {
 	return c.JSON(questions)
 }
 
-// --- TAMBAHAN BARU: Handler untuk GetQuestionByID (untuk form edit) ---
 func (h *QuestionHandler) GetQuestionByID(c *fiber.Ctx) error {
 	question, err := h.service.GetQuestionByID(c.Params("id"))
 	if err != nil {
@@ -78,7 +72,6 @@ func (h *QuestionHandler) GetQuestionByID(c *fiber.Ctx) error {
 	}
 	return c.JSON(question)
 }
-// --- AKHIR TAMBAHAN BARU ---
 
 func (h *QuestionHandler) UpdateQuestion(c *fiber.Ctx) error {
 	var req QuestionRequest
@@ -90,15 +83,13 @@ func (h *QuestionHandler) UpdateQuestion(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Validation failed", "details": err.Error()})
 	}
 
-	// --- PERBAIKAN 3: Parse string UUID secara manual (sama seperti Create) ---
 	testUUID, err := uuid.Parse(req.TestID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid TestID format"})
 	}
-	// --- AKHIR PERBAIKAN 3 ---
 
 	questionData := &model.Question{
-		TestID:        testUUID, // Gunakan UUID yang sudah di-parse
+		TestID:        testUUID,
 		QuestionText:  req.QuestionText,
 		Options:       req.Options,
 		CorrectAnswer: req.CorrectAnswer,
