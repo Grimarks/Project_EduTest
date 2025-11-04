@@ -26,7 +26,7 @@ const PremiumClasses = () => {
     const [error, setError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [categories, setCategories] = useState(["All"]);
-    const { user, isLoggedIn } = useAuth(); // <-- Ambil user dan status login
+    const { user, isLoggedIn } = useAuth();
 
     useEffect(() => {
         const fetchClasses = async () => {
@@ -77,7 +77,6 @@ const PremiumClasses = () => {
 
     return (
         <div className="min-h-screen bg-gradient-page">
-            {/* HEADER */}
             <section className="py-16 px-4">
                 <div className="max-w-7xl mx-auto text-center">
                     <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
@@ -89,7 +88,6 @@ const PremiumClasses = () => {
                 </div>
             </section>
 
-            {/* FILTER */}
             <section className="px-4 mb-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -133,9 +131,8 @@ const PremiumClasses = () => {
                             {filteredClasses.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {filteredClasses.map((premiumClass, index) => {
-                                        // --- LOGIKA TOMBOL BERDASARKAN STATUS USER ---
-                                        let buttonLink = `/order/class/${premiumClass.id}`;
-                                        let buttonText = "Enroll Now";
+                                        let buttonLink = `/order/premium/membership`; // Link generik
+                                        let buttonText = "Upgrade to Premium";
                                         let buttonVariant = "default";
 
                                         if (!isLoggedIn) {
@@ -156,14 +153,12 @@ const PremiumClasses = () => {
                                                 }}
                                             >
                                                 <CardHeader className="space-y-3">
-                                                    {/* --- PERBAIKAN GAMBAR --- */}
                                                     <div className="aspect-video rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                                                         {premiumClass.image_url ? (
                                                             <img
                                                                 src={premiumClass.image_url}
                                                                 alt={premiumClass.title}
                                                                 className="w-full h-full object-cover"
-                                                                // Tambahkan onError untuk fallback jika link gambar rusak
                                                                 onError={(e) => {
                                                                     e.currentTarget.style.display = 'none';
                                                                     const parent = e.currentTarget.parentElement;
@@ -184,7 +179,6 @@ const PremiumClasses = () => {
                                                             </div>
                                                         )}
                                                     </div>
-
                                                     <div className="flex items-start justify-between">
                                                         <Badge variant="outline" className="text-xs">
                                                             {premiumClass.category}
@@ -260,7 +254,6 @@ const PremiumClasses = () => {
                 </div>
             </section>
 
-            {/* CTA SECTION */}
             <section className="py-16 px-4 bg-gradient-hero">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
@@ -270,13 +263,13 @@ const PremiumClasses = () => {
                         Join thousands of students who have accelerated their journey with our premium classes.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button size="lg" variant="secondary" asChild>
+                        <Button variant="secondary" size="lg" asChild className="hover:scale-105 transition-bounce shadow-card">
                             <Link to="/register">Start Free Trial</Link>
                         </Button>
                         <Button
                             size="lg"
                             variant="outline"
-                            className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+                            className="border-primary-foreground text-black bg-white hover:scale-105 transition-bounce shadow-card"
                         >
                             View All Classes
                         </Button>

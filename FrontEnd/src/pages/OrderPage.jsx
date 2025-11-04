@@ -4,11 +4,11 @@ import axios from "@/api/axiosConfig";
 import { useAuth } from "@/context/UseAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Loader2, ArrowLeft, CreditCard, ShoppingBag } from "lucide-react";
+import { Loader2, ArrowLeft, CreditCard, ShoppingBag, Star, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {Badge} from "@/components/ui/badge.jsx"
+import { cn } from "@/lib/utils";
 
-// Fungsi format harga
 const formatPrice = (price) =>
     new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -16,16 +16,42 @@ const formatPrice = (price) =>
         minimumFractionDigits: 0,
     }).format(price);
 
+const premiumPlans = [
+    {
+        id: "monthly",
+        title: "Langganan Bulanan",
+        description: "Akses premium penuh selama 30 hari.",
+        price: 249000,
+        discount: null,
+        itemId: "premium_monthly",
+    },
+    {
+        id: "yearly",
+        title: "Langganan Tahunan",
+        description: "Akses premium penuh selama 365 hari.",
+        price: 2490000,
+        discount: "Hemat 15%!",
+        itemId: "premium_yearly",
+    },
+];
+
+const VIRTUAL_PREMIUM_PRODUCT = {
+    id: "membership",
+    title: "EduTest+ Premium Membership",
+    description: "Akses penuh ke semua Tes Premium dan Kelas Premium di platform.",
+    instructor: "EduTest+ Team",
+};
+
 const OrderPage = () => {
     const { itemType, itemId } = useParams();
     const navigate = useNavigate();
     const { user, isLoggedIn, isLoading: isAuthLoading } = useAuth();
     const { toast } = useToast();
-
     const [item, setItem] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedPlan, setSelectedPlan] = useState(premiumPlans[0]); // Default bulanan
 
     useEffect(() => {
         if (!isLoggedIn && !isAuthLoading) {
@@ -37,7 +63,11 @@ const OrderPage = () => {
             navigate("/login");
             return;
         }
-
+        if (isLoggedIn && itemType === 'premium' && itemId === 'membership') {
+            setItem(VIRTUAL_PREMIUM_PRODUCT);
+            setIsLoading(false);
+            return;
+        }
         const fetchItem = async () => {
             setIsLoading(true);
             setError(null);
@@ -54,7 +84,9 @@ const OrderPage = () => {
 
             try {
                 const response = await axios.get(url);
-                setItem(response.data);
+                const fetchedItem = response.data;
+                setItem(VIRTUAL_PREMIUM_PRODUCT);
+
             } catch (err) {
                 setError("Gagal memuat detail item.");
                 console.error(err);
@@ -72,19 +104,18 @@ const OrderPage = () => {
         setIsSubmitting(true);
         try {
             const payload = {
-                item_type: itemType,
-                item_id: itemId,
-                amount: item.price || item.amount, // 'price' dari kelas/tes
+                item_type: selectedPlan.itemId,
+                item_id: '00000000-0000-0000-0000-000000000000',
+                amount: selectedPlan.price,
             };
 
-            const response = await axios.post("/orders", payload);
+            await axios.post("/orders", payload);
 
             toast({
                 title: "Order Dibuat!",
                 description: "Silakan lanjutkan ke pembayaran.",
             });
 
-            // Redirect ke halaman "My Orders" untuk upload bukti
             navigate("/my-orders");
 
         } catch (err) {
@@ -111,24 +142,24 @@ const OrderPage = () => {
         return <div className="p-8 text-center">Item tidak ditemukan.</div>;
     }
 
-    // Cek jika user sudah premium
     if (user?.is_premium) {
         return (
             <div className="p-8 text-center space-y-4">
                 <h1 className="text-2xl font-bold">Anda Sudah Premium</h1>
                 <p className="text-muted-foreground">Anda sudah memiliki akses ke semua konten premium.</p>
                 <Button asChild>
-                    <Link to={itemType === 'class' ? "/premium" : "/tests"}>Kembali</Link>
+                    <Link to="/dashboard">Kembali ke Dashboard</Link>
                 </Button>
             </div>
         );
     }
+    const backLink = itemType === 'class' ? "/premium" : itemType === 'test' ? "/tests" : "/";
 
     return (
         <div className="min-h-screen bg-gradient-page py-12 px-4">
             <div className="max-w-2xl mx-auto">
                 <Button variant="outline" size="sm" asChild className="mb-4">
-                    <Link to={itemType === 'class' ? "/premium" : "/tests"}>
+                    <Link to={backLink}>
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Kembali
                     </Link>
@@ -138,23 +169,61 @@ const OrderPage = () => {
                     <CardHeader>
                         <CardTitle className="text-2xl flex items-center gap-2">
                             <ShoppingBag className="h-6 w-6" />
-                            Konfirmasi Pesanan
+                            Upgrade ke Premium
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="border rounded-lg p-4 bg-muted/50">
                             <h3 className="font-semibold text-lg">{item.title}</h3>
                             <p className="text-sm text-muted-foreground">{item.description}</p>
-                            <div className="border-t my-2" />
-                            <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Tipe Item:</span>
-                                <Badge variant="outline">{itemType}</Badge>
-                            </div>
-                            <div className="flex justify-between items-center mt-1">
-                                <span className="text-muted-foreground">Instruktur:</span>
-                                <span>{item.instructor || "-"}</span>
+                        </div>
+
+                        <Card>
+                            <CardContent className="p-4 space-y-2">
+                                <h4 className="font-semibold">Keuntungan Premium:</h4>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Star className="h-4 w-4 text-accent flex-shrink-0" />
+                                    <span>Akses penuh ke semua <strong>Tes Premium</strong></span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Star className="h-4 w-4 text-accent flex-shrink-0" />
+                                    <span>Akses penuh ke semua <strong>Kelas Premium</strong></span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Star className="h-4 w-4 text-accent flex-shrink-0" />
+                                    <span>Analisis Performa Mendalam</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* --- DITAMBAH: Pilihan Paket --- */}
+                        <div className="space-y-4">
+                            <h4 className="font-semibold">Pilih Paket Langganan:</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {premiumPlans.map((plan) => (
+                                    <Button
+                                        key={plan.id}
+                                        variant="outline"
+                                        className={cn(
+                                            "h-auto p-4 flex flex-col items-start text-left relative",
+                                            selectedPlan.id === plan.id && "border-primary ring-2 ring-primary"
+                                        )}
+                                        onClick={() => setSelectedPlan(plan)}
+                                    >
+                                        {selectedPlan.id === plan.id && (
+                                            <CheckCircle className="h-5 w-5 text-primary absolute top-2 right-2" />
+                                        )}
+                                        <span className="font-bold text-lg">{plan.title}</span>
+                                        <span className="text-xl font-bold text-primary my-1">{formatPrice(plan.price)}</span>
+                                        <span className="text-sm text-muted-foreground">{plan.description}</span>
+                                        {plan.discount && (
+                                            <Badge variant="destructive" className="mt-2">{plan.discount}</Badge>
+                                        )}
+                                    </Button>
+                                ))}
                             </div>
                         </div>
+                        {/* --- AKHIR PILIHAN PAKET --- */}
 
                         <Card>
                             <CardContent className="p-4">
@@ -168,7 +237,7 @@ const OrderPage = () => {
                         <div className="border-t pt-4 space-y-2">
                             <div className="flex justify-between text-lg font-medium">
                                 <span>Total Pembayaran:</span>
-                                <span className="text-primary">{formatPrice(item.price)}</span>
+                                <span className="text-primary">{formatPrice(selectedPlan.price)}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">
                                 Dengan mengklik "Konfirmasi & Bayar", Anda menyetujui bahwa pembelian ini akan memberikan Anda akses Premium ke seluruh platform.

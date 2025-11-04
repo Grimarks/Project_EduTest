@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import axios from "@/api/axiosConfig";
-
 const UseAuth = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -29,13 +28,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const response = await axios.post("/auth/login", { email, password });
-
-            const token = response.data?.token;
-            if (token) {
-                localStorage.setItem("accessToken", token);
-            }
-
+            await axios.post("/auth/login", { email, password });
             await checkLoginStatus();
             return true;
         } catch (error) {
@@ -60,7 +53,6 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error("Logout failed:", error.response?.data?.error || error.message);
         } finally {
-            localStorage.removeItem("accessToken"); // hapus token dari localStorage
             setUser(null);
             setIsLoggedIn(false);
         }

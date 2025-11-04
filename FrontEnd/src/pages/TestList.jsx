@@ -34,9 +34,9 @@ const TestList = () => {
                     ...test,
                     id: String(test.id),
                     questionCount: test.questions?.length || test.questionCount || 0,
+                    isPremium: test.isPremium ?? test.is_premium ?? false,
                 }));
                 setTests(formattedTests);
-
                 const uniqueCategories = [
                     ...new Set(formattedTests.map((t) => t.category || "General")),
                 ];
@@ -55,7 +55,6 @@ const TestList = () => {
         };
         fetchTests();
     }, []);
-
     const filteredTests = tests.filter((test) => {
         const matchesSearch =
             test.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -12,7 +12,7 @@ const AdminManageUsers = () => {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [updatingId, setUpdatingId] = useState(null); // Lacak user yg sedang diupdate
+    const [updatingId, setUpdatingId] = useState(null);
     const { toast } = useToast();
 
     const fetchUsers = async () => {
@@ -49,7 +49,6 @@ const AdminManageUsers = () => {
                 title: "Sukses",
                 description: `User ${user.name} telah diupdate.`,
             });
-            // Update state lokal agar UI responsif
             setUsers(users.map(u =>
                 u.id === user.id ? { ...u, role: newRole, is_premium: newIsPremium } : u
             ));

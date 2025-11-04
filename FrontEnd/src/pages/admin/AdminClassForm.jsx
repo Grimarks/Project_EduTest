@@ -15,11 +15,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ChevronLeft, Save } from "lucide-react";
 
-// Kategori bisa dibuat dinamis, tapi untuk saat ini statis
 const categories = ["Mathematics", "English", "Science", "General", "Business"];
 
 const AdminClassForm = () => {
-    const { classId } = useParams(); // Ambil classId dari URL
+    const { classId } = useParams();
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -27,9 +26,9 @@ const AdminClassForm = () => {
         title: "",
         description: "",
         instructor: "",
-        price: 0,
         image_url: "",
         category: "General",
+        duration: "",
     });
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
@@ -46,9 +45,9 @@ const AdminClassForm = () => {
                         title: cls.title || "",
                         description: cls.description || "",
                         instructor: cls.instructor || "",
-                        price: cls.price || 0,
                         image_url: cls.image_url || "",
                         category: cls.category || "General",
+                        duration: cls.duration || "",
                     });
                 })
                 .catch(err => {
@@ -76,10 +75,8 @@ const AdminClassForm = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        const payload = {
-            ...formData,
-            price: parseFloat(formData.price) || 0,
-        };
+        // eslint-disable-next-line no-unused-vars
+        const { price, ...payload } = formData;
 
         try {
             if (isEditMode) {
@@ -186,17 +183,15 @@ const AdminClassForm = () => {
                             </Select>
                         </div>
 
-                        {/* Harga */}
+                        {/* --- DITAMBAH: Durasi --- */}
                         <div className="space-y-2">
-                            <Label htmlFor="price">Harga (IDR)</Label>
+                            <Label htmlFor="duration">Durasi</Label>
                             <Input
-                                id="price"
-                                name="price"
-                                type="number"
-                                value={formData.price}
+                                id="duration"
+                                name="duration"
+                                value={formData.duration}
                                 onChange={handleChange}
-                                placeholder="Contoh: 150000"
-                                required
+                                placeholder="Contoh: 8 Minggu / 40 Jam"
                             />
                         </div>
 

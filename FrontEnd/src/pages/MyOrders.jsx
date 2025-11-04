@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 
-// Fungsi format harga
 const formatPrice = (price) =>
     new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -20,8 +19,20 @@ const formatPrice = (price) =>
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("id-ID");
 }
-
-// Komponen untuk satu order
+const getOrderItemName = (itemType) => {
+    switch (itemType) {
+        case "premium_monthly":
+            return "Langganan Premium (1 Bulan)";
+        case "premium_yearly":
+            return "Langganan Premium (1 Tahun)";
+        case "class":
+            return "Premium Class";
+        case "test":
+            return "Premium Test";
+        default:
+            return "Aktivasi Akun Premium";
+    }
+};
 const OrderItem = ({ order, fetchOrders }) => {
     const { toast } = useToast();
     const [isUploading, setIsUploading] = useState(false);
@@ -65,13 +76,21 @@ const OrderItem = ({ order, fetchOrders }) => {
         }
     };
 
+    const isSubscription = order.item_type.startsWith('premium_');
+
     return (
         <Card className="p-4">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                 <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Order ID: {order.id}</p>
-                    <p className="text-lg font-semibold capitalize">Aktivasi Akun Premium</p>
-                    <p className="text-sm">Item: {order.item_type} (ID: {order.item_id})</p>
+                    {/* --- PERBAIKAN: Gunakan fungsi helper --- */}
+                    <p className="text-lg font-semibold capitalize">
+                        {getOrderItemName(order.item_type)}
+                    </p>
+                    {/* --- PERBAIKAN: Sembunyikan jika ini langganan --- */}
+                    {!isSubscription && (
+                        <p className="text-sm">Item: {order.item_type} (ID: {order.item_id})</p>
+                    )}
                     <p>Jumlah: <span className="font-bold text-primary">{formatPrice(order.amount)}</span></p>
                     <p className="text-xs text-muted-foreground">
                         Tanggal: {formatDate(order.created_at)}
@@ -125,7 +144,6 @@ const OrderItem = ({ order, fetchOrders }) => {
         </Card>
     );
 };
-
 const MyOrders = () => {
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

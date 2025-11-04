@@ -15,7 +15,6 @@ const TakeTest = () => {
     const location = useLocation();
     const { toast } = useToast(); // Panggil hook toast
     const { user, isLoggedIn, isLoading: isAuthLoading } = useAuth();
-
     const [test, setTest] = useState(null);
     const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +23,6 @@ const TakeTest = () => {
     const [answers, setAnswers] = useState({});
     const [timeLeft, setTimeLeft] = useState(0);
     const [isSubmitted, setIsSubmitted] = useState(false);
-
     const timerRef = useRef(null);
 
     useEffect(() => {
@@ -104,7 +102,6 @@ const TakeTest = () => {
             });
         }, 1000);
 
-        // Cleanup function
         return () => {
             clearInterval(timerRef.current);
         };
@@ -168,7 +165,7 @@ const TakeTest = () => {
             });
         } catch (error) {
             console.error("Failed to submit test:", error);
-            setIsSubmitted(false); // Biarkan user mencoba submit lagi jika gagal
+            setIsSubmitted(false);
             toast({
                 title: "Submit Gagal",
                 description: "Gagal mengirimkan hasil tes. Coba lagi.",

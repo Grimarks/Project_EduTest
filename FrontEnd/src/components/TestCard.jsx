@@ -12,9 +12,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/context/UseAuth";
 
 const TestCard = ({ test }) => {
-    const { user } = useAuth(); // Cek status user (premium atau bukan)
+    const { user } = useAuth();
 
-    // Normalisasi data agar konsisten
     const normalizedTest = {
         id: String(test.id || test._id || Math.random()),
         title: test.title || "Untitled Test",
@@ -58,10 +57,11 @@ const TestCard = ({ test }) => {
 
     if (normalizedTest.isPremium) {
         if (!user?.is_premium) {
-            buttonLink = `/order/test/${normalizedTest.id}`;
-            buttonText = "Buy Premium Access";
+            buttonLink = `/order/premium/membership`;
+            buttonText = "Upgrade to Premium";
             buttonVariant = "default";
         } else {
+            // Jika premium dan user premium
             buttonText = "Start Premium Test";
             buttonVariant = "default";
         }
@@ -103,14 +103,13 @@ const TestCard = ({ test }) => {
                     </div>
                 </div>
 
-                {normalizedTest.isPremium && (
+                {normalizedTest.isPremium && !user?.is_premium && (
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Harga Akses:</span>
-                        <span className="font-semibold text-primary">
-                            {formatPrice(normalizedTest.price)}
-                        </span>
+                        <span className="text-sm text-muted-foreground">Access:</span>
+                        <Badge variant="secondary">Premium Only</Badge>
                     </div>
                 )}
+
 
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
@@ -122,7 +121,7 @@ const TestCard = ({ test }) => {
                 <Button
                     asChild
                     variant={buttonVariant}
-                    className="w-full hover:bg-blue-600"
+                    className="w-full"
                 >
                     <Link to={buttonLink}>{buttonText}</Link>
                 </Button>

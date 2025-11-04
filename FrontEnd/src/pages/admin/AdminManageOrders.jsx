@@ -6,6 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const getOrderItemName = (itemType) => {
+    switch (itemType) {
+        case "premium_monthly":
+            return "Langganan Premium (1 Bulan)";
+        case "premium_yearly":
+            return "Langganan Premium (1 Tahun)";
+        case "class":
+            return "Premium Class"; // Fallback
+        case "test":
+            return "Premium Test"; // Fallback
+        default:
+            return "Aktivasi Akun Premium";
+    }
+};
+
 const AdminManageOrders = () => {
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +45,7 @@ const AdminManageOrders = () => {
     }, []);
 
     const handleVerify = async (orderId) => {
-        if (!window.confirm("Verifikasi pembayaran dan berikan akses premium?")) return;
+        if (!window.confirm("Apakah Anda yakin ingin memverifikasi pesanan ini secara manual dan memberikan akses premium?")) return;
 
         try {
             await axios.put(`/orders/${orderId}/verify`);
@@ -79,7 +94,10 @@ const AdminManageOrders = () => {
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                                         <div className="space-y-1">
                                             <p className="text-sm text-muted-foreground">Order ID: {order.id}</p>
-                                            <p className="text-lg font-semibold">{order.item_type === 'class' ? "Premium Class" : "Premium Test"}</p>
+                                            {/* --- PERBAIKAN: Gunakan fungsi helper --- */}
+                                            <p className="text-lg font-semibold capitalize">
+                                                {getOrderItemName(order.item_type)}
+                                            </p>
                                             <p>User: <span className="font-medium">{order.User?.name || "N/A"}</span> ({order.User?.email || "N/A"})</p>
                                             <p>Amount: <span className="font-bold">{formatPrice(order.amount)}</span></p>
                                             <p className="text-xs text-muted-foreground">
@@ -103,7 +121,6 @@ const AdminManageOrders = () => {
                                                 <Button
                                                     size="sm"
                                                     onClick={() => handleVerify(order.id)}
-                                                    disabled={!order.payment_proof_url}
                                                 >
                                                     <CheckCheck className="h-4 w-4 mr-2" />
                                                     Verifikasi

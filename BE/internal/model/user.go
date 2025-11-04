@@ -14,6 +14,7 @@ type User struct {
 	Email        string    `gorm:"type:varchar(255);unique;not null"`
 	PasswordHash string    `gorm:"type:varchar(255);not null"`
 	IsPremium    bool      `gorm:"default:false"`
+	PremiumExpiresAt *time.Time `gorm:"null"` // <-- TAMBAHKAN INI
 	Role         string    `gorm:"type:varchar(50);default:'user'"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

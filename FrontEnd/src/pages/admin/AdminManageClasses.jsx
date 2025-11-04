@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2, User } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, User, Clock } from "lucide-react"; // <-- Impor Clock
 
 const AdminManageClasses = () => {
         const [classes, setClasses] = useState([]);
@@ -39,7 +39,7 @@ const AdminManageClasses = () => {
                                 title: "Sukses",
                                 description: "Kelas berhasil dihapus.",
                         });
-                        fetchClasses(); // Muat ulang data
+                        fetchClasses();
                 } catch (err) {
                         toast({
                                 title: "Error",
@@ -49,13 +49,6 @@ const AdminManageClasses = () => {
                         console.error(err);
                 }
         };
-
-        const formatPrice = (price) =>
-            new Intl.NumberFormat("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                    minimumFractionDigits: 0,
-            }).format(price);
 
         return (
             <div className="space-y-6">
@@ -88,8 +81,10 @@ const AdminManageClasses = () => {
                                                             <User className="h-4 w-4" />
                                                             <span>{cls.instructor}</span>
                                                     </div>
-                                                    <div className="mt-2 font-semibold text-lg text-primary">
-                                                            {formatPrice(cls.price)}
+                                                    {/* --- PERBAIKAN: Ganti Harga dengan Durasi --- */}
+                                                    <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                                                            <Clock className="h-4 w-4" />
+                                                            <span>{cls.duration || "N/A"}</span>
                                                     </div>
                                             </CardContent>
                                             <CardFooter className="flex gap-2">
@@ -104,7 +99,7 @@ const AdminManageClasses = () => {
                                                         size="sm"
                                                         onClick={() => handleDelete(cls.id)}
                                                     >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="h-4 w-4" color="white" />
                                                     </Button>
                                             </CardFooter>
                                     </Card>

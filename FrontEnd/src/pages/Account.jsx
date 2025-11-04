@@ -1,4 +1,3 @@
-// src/pages/Account.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -18,7 +17,7 @@ import { User, LogOut, Eye, EyeOff } from "lucide-react";
 const Account = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { user, logout } = useAuth(); // Ambil user dan logout dari context
+    const { user, logout } = useAuth();
 
     const [updating, setUpdating] = useState(false);
     const [name, setName] = useState(user?.name || "");
@@ -26,7 +25,6 @@ const Account = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
-    // Update nama bila data user berubah (misal setelah refresh)
     useEffect(() => {
         if (user?.name) {
             setName(user.name);

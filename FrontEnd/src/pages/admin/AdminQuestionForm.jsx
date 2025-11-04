@@ -1,4 +1,3 @@
-// src/pages/admin/AdminQuestionForm.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "@/api/axiosConfig";
@@ -17,11 +16,9 @@ import {
 } from "@/components/ui/select";
 
 const AdminQuestionForm = () => {
-    // Kita butuh testId dan questionId dari URL
     const { testId, questionId } = useParams();
     const navigate = useNavigate();
     const { toast } = useToast();
-
     const [questionText, setQuestionText] = useState("");
     const [options, setOptions] = useState(["", "", "", ""]); // Default 4 pilihan
     const [correctAnswer, setCorrectAnswer] = useState(0);
@@ -31,11 +28,10 @@ const AdminQuestionForm = () => {
 
     const isEditMode = Boolean(questionId);
 
-    // Jika mode edit, ambil data soal
     useEffect(() => {
         if (isEditMode) {
             setIsFetching(true);
-            axios.get(`/questions/${questionId}`) // Asumsi endpoint ini ada (kita akan buat nanti)
+            axios.get(`/questions/${questionId}`)
                 .then(response => {
                     const q = response.data;
                     setQuestionText(q.question_text);
@@ -51,17 +47,13 @@ const AdminQuestionForm = () => {
         }
     }, [questionId, isEditMode, toast]);
 
-    // Handler untuk mengubah teks pilihan jawaban
     const handleOptionChange = (index, value) => {
         const newOptions = [...options];
         newOptions[index] = value;
         setOptions(newOptions);
     };
-
-    // Handler untuk menambah pilihan jawaban baru
     const addOption = () => setOptions([...options, ""]);
 
-    // Handler untuk menghapus pilihan jawaban
     const removeOption = (index) => {
         if (options.length <= 2) {
             toast({ title: "Warning", description: "Minimal harus ada 2 pilihan jawaban.", variant: "destructive" });
@@ -77,11 +69,8 @@ const AdminQuestionForm = () => {
         const payload = {
             test_id: testId,
             question_text: questionText,
-            options: JSON.stringify(options), // Kirim sebagai string JSON
-            // --- PERBAIKAN DI SINI ---
-            // Memastikan correct_answer adalah integer, walaupun seharusnya sudah
+            options: JSON.stringify(options),
             correct_answer: parseInt(correctAnswer, 10),
-            // --- AKHIR PERBAIKAN ---
             explanation: explanation,
         };
 
@@ -154,7 +143,7 @@ const AdminQuestionForm = () => {
                                         size="icon"
                                         onClick={() => removeOption(index)}
                                     >
-                                        <X className="h-4 w-4" />
+                                        <X className="h-4 w-4" color="white"/>
                                     </Button>
                                 </div>
                             ))}

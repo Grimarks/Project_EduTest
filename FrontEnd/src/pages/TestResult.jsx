@@ -1,4 +1,3 @@
-// src/pages/TestResult.jsx
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "@/api/axiosConfig";
@@ -12,8 +11,6 @@ const TestResult = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [recommendedClasses, setRecommendedClasses] = useState([]);
-
-    // Ambil data dari state navigasi
     const {
         testId,
         testTitle,
@@ -24,20 +21,17 @@ const TestResult = () => {
         answers,
         questions,
     } = location.state || {};
-
-    // Jika tidak ada state (misal user refresh halaman langsung)
     useEffect(() => {
         if (!location.state) {
             navigate("/tests");
         }
     }, [location.state, navigate]);
 
-    // Fetch rekomendasi kelas (hanya jika skor < 80)
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
                 const res = await axios.get("/premium-classes");
-                setRecommendedClasses((res.data || []).slice(0, 2)); // Ambil 2 kelas pertama
+                setRecommendedClasses((res.data || []).slice(0, 2));
             } catch (err) {
                 console.error("Failed to fetch recommendations:", err);
             }
@@ -47,7 +41,6 @@ const TestResult = () => {
         }
     }, [score, location.state]);
 
-    // Format waktu
     const formatTime = (seconds) => {
         if (typeof seconds !== "number") return "0:00";
         const minutes = Math.floor(seconds / 60);
@@ -69,7 +62,6 @@ const TestResult = () => {
         return "Keep practicing! You'll get there.";
     };
 
-    // Jika state kosong (misal user refresh)
     if (!location.state) {
         return <div className="p-8 text-center">Loading result...</div>;
     }

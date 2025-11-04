@@ -23,18 +23,20 @@ type CreateClassRequest struct {
 	Title       string  `json:"title" validate:"required"`
 	Description string  `json:"description"`
 	Instructor  string  `json:"instructor" validate:"required"`
-	Price       float64 `json:"price" validate:"required,gt=0"`
+	// Price       float64 `json:"price" validate:"required,gt=0"` // <-- DIHAPUS
 	ImageURL    string  `json:"image_url" validate:"url"`
 	Category    string  `json:"category"`
+	Duration    string  `json:"duration"` // <-- DITAMBAH
 }
 
 type UpdateClassRequest struct {
 	Title       string  `json:"title" validate:"required"`
 	Description string  `json:"description"`
 	Instructor  string  `json:"instructor" validate:"required"`
-	Price       float64 `json:"price" validate:"required,gt=0"`
+	// Price       float64 `json:"price" validate:"required,gt=0"` // <-- DIHAPUS
 	ImageURL    string  `json:"image_url" validate:"url"`
 	Category    string  `json:"category"`
+	Duration    string  `json:"duration"` // <-- DITAMBAH
 }
 
 
@@ -48,9 +50,10 @@ func (s *premiumClassService) CreateClass(request *CreateClassRequest) (*model.P
 		Title:       request.Title,
 		Description: request.Description,
 		Instructor:  request.Instructor,
-		Price:       request.Price,
+		// Price:       request.Price, // <-- DIHAPUS
 		ImageURL:    request.ImageURL,
 		Category:    request.Category,
+		Duration:    request.Duration, // <-- DITAMBAH
 	}
 
 	err := s.repo.Create(class)
@@ -86,9 +89,10 @@ func (s *premiumClassService) UpdateClass(id string, request *UpdateClassRequest
 	existingClass.Title = request.Title
 	existingClass.Description = request.Description
 	existingClass.Instructor = request.Instructor
-	existingClass.Price = request.Price
+	// existingClass.Price = request.Price // <-- DIHAPUS
 	existingClass.ImageURL = request.ImageURL
 	existingClass.Category = request.Category
+	existingClass.Duration = request.Duration // <-- DITAMBAH
 
 	err = s.repo.Update(existingClass)
 	if err != nil {

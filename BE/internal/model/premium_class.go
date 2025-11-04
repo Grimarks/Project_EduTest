@@ -10,9 +10,10 @@ type PremiumClass struct {
 	Title       string    `gorm:"type:varchar(255);not null" json:"title"`
 	Description string    `gorm:"type:text" json:"description"`
 	Instructor  string    `gorm:"type:varchar(255)" json:"instructor"`
-	Price       float64   `gorm:"type:decimal(10,2)" json:"price"`
+	// Price       float64   `gorm:"type:decimal(10,2)" json:"price"` // <-- DIHAPUS
 	ImageURL    string    `gorm:"type:varchar(255)" json:"image_url"`
 	Category    string    `gorm:"type:varchar(100)" json:"category"`
+	Duration    string    `gorm:"type:varchar(100)" json:"duration"` // <-- DITAMBAH
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
