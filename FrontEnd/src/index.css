@@ -59,7 +59,7 @@
         }
 
         .bg-muted {
-            @apply bg-[hsl(210,17%,95%)];
+            @apply bg-[hsl(217,91%,60%)];
         }
         .text-muted-foreground {
             @apply text-[hsl(215,16%,47%)];

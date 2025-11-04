@@ -28,13 +28,13 @@ func (r *testRepository) Create(test *model.Test) error {
 
 func (r *testRepository) FindAll() ([]model.Test, error) {
     var tests []model.Test
-    err := r.db.Find(&tests).Error
+    err := r.db.Preload("Questions").Find(&tests).Error
     return tests, err
 }
 
 func (r *testRepository) FindByID(id uuid.UUID) (*model.Test, error) {
     var test model.Test
-    err := r.db.First(&test, "id = ?", id).Error
+    err := r.db.Preload("Questions").First(&test, "id = ?", id).Error
     return &test, err
 }
 

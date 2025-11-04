@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import heroImage from "../assets/hero-education.jpg";
 import TestCard from "../components/TestCard";
-
 import { Button } from "../components/ui/button.jsx";
 import {
     Card,
@@ -32,9 +31,13 @@ const Home = () => {
             setIsLoading(true);
             setError(null);
             try {
-                // Ambil 3 tes saja untuk ditampilkan di Home
                 const response = await axios.get("/tests");
-                setFeaturedTests(response.data?.slice(0, 3) || []);
+                const formattedTests = (response.data || []).map((test) => ({
+                    ...test,
+                    id: String(test.id),
+                    questionCount: test.questions?.length || test.questionCount || 0,
+                }));
+                setFeaturedTests(formattedTests.slice(0, 3));
             } catch (err) {
                 console.error("Failed to fetch featured tests:", err);
                 setError("Could not load featured tests.");
@@ -81,7 +84,6 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* Hero Section */}
             <section className="relative overflow-hidden">
                 <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -92,14 +94,14 @@ const Home = () => {
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="space-y-8"> {/* Hapus animate-slide-up jika ada */}
+                        <div className="space-y-8">
                             <div className="space-y-4">
-                                <Badge className="bg-primary-glow text-primary-foreground hover:bg-primary-glow/90">
-                                    🎯 #1 Online Test Platform
+                                <Badge className="bg-white text-black ">
+                                    #1 Online Test Platform
                                 </Badge>
                                 <h1 className="text-4xl lg:text-6xl font-bold text-white leading-tight">
                                     Master Your Exams with{" "}
-                                    <span className="text-primary-glow">EduTest+</span>
+                                    <span className="text-white brightness-110">EduTest+</span>
                                 </h1>
                                 <p className="text-xl text-white/90 leading-relaxed">
                                     The ultimate platform for online test simulation and premium
@@ -107,22 +109,26 @@ const Home = () => {
                                     boost your confidence.
                                 </p>
                             </div>
-
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Button variant="hero" size="lg" asChild>
+                                <Button
+                                    variant="default"
+                                    size="lg"
+                                    asChild
+                                    className="hover:shadow-glow transform hover:scale-105 transition-bounce shadow-card"
+                                >
                                     <Link to="/tests">Start Practicing Now</Link>
                                 </Button>
                                 <Button
-                                    variant="hero"
+                                    variant="default"
                                     size="lg"
-                                    className="border-white bg-black text-white hover:text-primary"
+                                    asChild
+                                    className="hover:shadow-glow transform hover:scale-105 transition-bounce shadow-card"
                                 >
                                     <Link to="/premium">View Premium Classes</Link>
                                 </Button>
                             </div>
                         </div>
 
-                        {/* --- KARTU YANG DIANIMASIKAN --- */}
                         <div className="hidden lg:block">
                             <Card className="bg-white/10 backdrop-blur-md border-white/20 shadow-glow animate-float">
                                 <CardHeader>
@@ -131,7 +137,7 @@ const Home = () => {
                                 <CardContent className="grid grid-cols-2 gap-4">
                                     {stats.map((stat, index) => (
                                         <div key={index} className="text-center space-y-2">
-                                            <stat.icon className="h-8 w-8 text-primary-glow mx-auto" />
+                                            <stat.icon className="h-8 w-8 text-white/90 mx-auto" />
                                             <div className="text-2xl font-bold text-white">
                                                 {stat.value}
                                             </div>
@@ -141,12 +147,10 @@ const Home = () => {
                                 </CardContent>
                             </Card>
                         </div>
-                        {/* --- AKHIR KARTU --- */}
                     </div>
                 </div>
             </section>
 
-            {/* Features Section */}
             <section className="py-16 lg:py-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center space-y-4 mb-16">
@@ -182,7 +186,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Featured Tests Section */}
             <section className="py-16 lg:py-24 bg-muted/30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between mb-12">
@@ -215,7 +218,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
             <section className="py-16 lg:py-24">
                 <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
                     <Card className="bg-gradient-hero text-primary-foreground shadow-glow">
@@ -244,13 +246,12 @@ const Home = () => {
                                 </div>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <Button variant="secondary" size="lg" asChild>
+                                <Button variant="secondary" size="lg" asChild className="hover:scale-105 transition-bounce shadow-card">
                                     <Link to="/register">Get Started Free</Link>
                                 </Button>
                                 <Button
-                                    variant="outline"
                                     size="lg"
-                                    className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                                    className="border-primary-foreground text-black bg-white hover:scale-105 transition-bounce shadow-card"
                                 >
                                     <Link to="/premium">Explore Premium</Link>
                                 </Button>

@@ -25,10 +25,8 @@ const TakeTest = () => {
     const [timeLeft, setTimeLeft] = useState(0);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    // --- PERBAIKAN TIMER: Gunakan useRef untuk menyimpan ID interval ---
     const timerRef = useRef(null);
 
-    // --- BLOK PERBAIKAN OTENTIKASI (Sudah ada, tapi kita tambahkan toast) ---
     useEffect(() => {
         if (!isAuthLoading && !isLoggedIn) {
             toast({
@@ -39,7 +37,6 @@ const TakeTest = () => {
             navigate("/login", { state: { from: location.pathname } });
         }
     }, [isAuthLoading, isLoggedIn, navigate, location.pathname, toast]);
-    // --- AKHIR BLOK PERBAIKAN ---
 
     useEffect(() => {
         if (isAuthLoading || !isLoggedIn) return;
@@ -51,8 +48,6 @@ const TakeTest = () => {
                 const testResponse = await axios.get(`/tests/${testId}`);
                 const fetchedTest = { ...testResponse.data, id: String(testResponse.data.id) };
 
-                // --- PERBAIKAN AKSES PREMIUM ---
-                // Cek apakah tes ini premium dan user bukan premium
                 if (fetchedTest.is_premium && !user?.is_premium) {
                     setError("Tes ini khusus untuk anggota premium.");
                     toast({
@@ -61,9 +56,8 @@ const TakeTest = () => {
                         variant: "destructive",
                     });
                     setIsLoading(false);
-                    return; // Hentikan fetching
+                    return;
                 }
-                // --- AKHIR PERBAIKAN ---
 
                 setTest(fetchedTest);
                 setTimeLeft(fetchedTest.duration * 60);
@@ -88,9 +82,7 @@ const TakeTest = () => {
         fetchTestData();
     }, [testId, isAuthLoading, isLoggedIn, user]);
 
-    // --- PERBAIKAN TIMER: useEffect baru untuk countdown ---
     useEffect(() => {
-        // Hanya jalan jika tes sudah ada dan waktu > 0
         if (!test || timeLeft <= 0 || isSubmitted) {
             clearInterval(timerRef.current);
             return;
@@ -100,13 +92,12 @@ const TakeTest = () => {
             setTimeLeft((prevTime) => {
                 if (prevTime <= 1) {
                     clearInterval(timerRef.current);
-                    // Waktu habis, auto-submit
                     toast({
                         title: "Waktu Habis!",
                         description: "Hasil tes Anda sedang dikirim...",
                         variant: "destructive",
                     });
-                    handleSubmit(true); // Kirim flag autoSubmit
+                    handleSubmit(true);
                     return 0;
                 }
                 return prevTime - 1;
@@ -117,8 +108,7 @@ const TakeTest = () => {
         return () => {
             clearInterval(timerRef.current);
         };
-    }, [test, timeLeft, isSubmitted, toast]); // Tambahkan dependensi
-    // --- AKHIR PERBAIKAN TIMER ---
+    }, [test, timeLeft, isSubmitted, toast]);
 
 
     const handleAnswerSelect = (questionId, optionIndex) => {
@@ -133,12 +123,10 @@ const TakeTest = () => {
 
     const handlePrevious = () => {
         if (currentQuestionIndex > 0) {
-            // BUGFIX: Seharusnya ke index sebelumnya, bukan +1
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
     };
 
-    // Modifikasi handleSubmit untuk menerima flag autoSubmit
     const handleSubmit = async (isAutoSubmit = false) => {
         if (isSubmitted) return;
 
@@ -149,7 +137,7 @@ const TakeTest = () => {
         }
 
         setIsSubmitted(true);
-        clearInterval(timerRef.current); // Hentikan timer
+        clearInterval(timerRef.current);
 
         const totalDurationSeconds = test ? test.duration * 60 : 0;
         const timeSpent = totalDurationSeconds > 0 ? totalDurationSeconds - timeLeft : 0;

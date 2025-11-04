@@ -60,7 +60,7 @@ const TestCard = ({ test }) => {
         if (!user?.is_premium) {
             buttonLink = `/order/test/${normalizedTest.id}`;
             buttonText = "Buy Premium Access";
-            buttonVariant = "secondary";
+            buttonVariant = "default";
         } else {
             buttonText = "Start Premium Test";
             buttonVariant = "default";
@@ -122,7 +122,7 @@ const TestCard = ({ test }) => {
                 <Button
                     asChild
                     variant={buttonVariant}
-                    className="w-full hover:bg-green-400"
+                    className="w-full hover:bg-blue-600"
                 >
                     <Link to={buttonLink}>{buttonText}</Link>
                 </Button>

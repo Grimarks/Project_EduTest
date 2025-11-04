@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "@/api/axiosConfig";
@@ -59,15 +58,16 @@ const Dashboard = () => {
             setError(null);
 
             try {
-                // Ambil hasil tes user
                 const resultsResponse = await axios.get(`/test-results/user/${user.id}`);
                 const results = resultsResponse.data || [];
-
-                // Ambil rekomendasi tes
                 const recResponse = await axios.get("/tests?limit=3&premium=false");
-                setRecommendations(recResponse.data || []);
+                const formattedRecs = (recResponse.data || []).map((test) => ({
+                    ...test,
+                    id: String(test.id),
+                    questionCount: test.questions?.length || test.questionCount || 0,
+                }));
+                setRecommendations(formattedRecs);
 
-                // Hitung statistik
                 const completed = results.length;
                 const totalScore = results.reduce((sum, r) => sum + (r.score || 0), 0);
                 const avgScore = completed > 0 ? Math.round(totalScore / completed) : 0;
@@ -76,8 +76,6 @@ const Dashboard = () => {
                     0
                 );
                 const studyTimeFormatted = formatStudyTime(totalTimeSeconds);
-
-                // Hitung rata-rata skor per kategori
                 const categoryScores = {};
                 results.forEach((r) => {
                     const category = r.Test?.category || "General";

@@ -16,7 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../components/ui/select";
-import { Clock, User, Star, CheckCircle } from "lucide-react";
+import { Clock, User, Star, CheckCircle, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/UseAuth";
 
@@ -156,19 +156,35 @@ const PremiumClasses = () => {
                                                 }}
                                             >
                                                 <CardHeader className="space-y-3">
-                                                    <div className="aspect-video rounded-lg bg-gradient-hero flex items-center justify-center overflow-hidden">
+                                                    {/* --- PERBAIKAN GAMBAR --- */}
+                                                    <div className="aspect-video rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                                                         {premiumClass.image_url ? (
                                                             <img
                                                                 src={premiumClass.image_url}
                                                                 alt={premiumClass.title}
                                                                 className="w-full h-full object-cover"
+                                                                // Tambahkan onError untuk fallback jika link gambar rusak
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = 'none';
+                                                                    const parent = e.currentTarget.parentElement;
+                                                                    if (parent) {
+                                                                        const icon = parent.querySelector('.fallback-icon');
+                                                                        if(icon) icon.style.display = 'flex';
+                                                                    }
+                                                                }}
                                                             />
                                                         ) : (
-                                                            <div className="bg-muted h-full w-full flex items-center justify-center text-muted-foreground text-sm">
-                                                                No Image
+                                                            <div className="bg-muted h-full w-full flex items-center justify-center text-muted-foreground">
+                                                                <BookOpen className="h-20 w-20 opacity-30" />
+                                                            </div>
+                                                        )}
+                                                        {premiumClass.image_url && (
+                                                            <div className="fallback-icon bg-muted h-full w-full items-center justify-center text-muted-foreground" style={{display: 'none'}}>
+                                                                <BookOpen className="h-20 w-20 opacity-30" />
                                                             </div>
                                                         )}
                                                     </div>
+
                                                     <div className="flex items-start justify-between">
                                                         <Badge variant="outline" className="text-xs">
                                                             {premiumClass.category}

@@ -16,4 +16,5 @@ type Test struct {
     ImageURL    string    `gorm:"type:varchar(255)" json:"image_url"`
     CreatedAt   time.Time `json:"created_at"`
     UpdatedAt   time.Time `json:"updated_at"`
+    Questions   []Question `gorm:"foreignKey:TestID" json:"questions"`
 }

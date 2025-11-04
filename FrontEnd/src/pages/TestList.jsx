@@ -17,17 +17,13 @@ const TestList = () => {
     const [tests, setTests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // --- FILTER DINAMIS ---
     const [categories, setCategories] = useState(["All"]);
     const [difficulties, setDifficulties] = useState(["All"]);
-
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [selectedDifficulty, setSelectedDifficulty] = useState("All");
     const [showPremiumOnly, setShowPremiumOnly] = useState(false);
 
-    // --- FETCH DATA DARI API ---
     useEffect(() => {
         const fetchTests = async () => {
             setIsLoading(true);
@@ -41,7 +37,6 @@ const TestList = () => {
                 }));
                 setTests(formattedTests);
 
-                // --- BUAT FILTER DINAMIS DARI DATA API ---
                 const uniqueCategories = [
                     ...new Set(formattedTests.map((t) => t.category || "General")),
                 ];
@@ -61,7 +56,6 @@ const TestList = () => {
         fetchTests();
     }, []);
 
-    // --- FILTERING ---
     const filteredTests = tests.filter((test) => {
         const matchesSearch =
             test.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -161,7 +155,7 @@ const TestList = () => {
                     {/* Active Filters */}
                     <div className="flex flex-wrap gap-2 mt-4">
                         {searchTerm && (
-                            <Badge variant="secondary" className="flex items-center gap-1">
+                            <Badge className="flex items-center gap-1">
                                 Search: {searchTerm}
                                 <button
                                     onClick={() => setSearchTerm("")}
