@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -24,14 +23,14 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { login } = useAuth(); // Ambil fungsi login dari context
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
-            await login(email, password); // Gunakan fungsi login dari context
+            await login(email, password);
             toast({
                 title: "Welcome back!",
                 description: "You have successfully logged in.",

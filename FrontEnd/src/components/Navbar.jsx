@@ -1,7 +1,6 @@
-// src/components/Navbar.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button.jsx";
-import { BookOpen, Menu, X, CircleUserRound, ShieldCheck, Receipt } from "lucide-react"; // <-- Tambah Receipt
+import { BookOpen, Menu, X, CircleUserRound, ShieldCheck, Receipt } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/UseAuth.jsx";
 
@@ -23,7 +22,7 @@ const Navbar = () => {
         { name: "Dashboard", path: "/dashboard" },
     ];
 
-    // Tambahkan My Orders jika user login
+    //  My Orders muncul jika user login
     if (isLoggedIn) {
         navItems.push({ name: "My Orders", path: "/my-orders" });
     }

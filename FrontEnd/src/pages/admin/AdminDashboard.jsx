@@ -39,9 +39,6 @@ const AdminDashboard = () => {
                 <CardContent>
                     <p className="text-muted-foreground">
                         Gunakan sidebar di sebelah kiri untuk mengelola tes, kelas premium, pengguna, dan pesanan.
-                        <br />
-                        <strong>Catatan:</strong> Saat ini, fungsionalitas penuh untuk "Manage Users" dan "Manage Orders"
-                        membutuhkan endpoint tambahan di Backend (misal: GET /api/users dan GET /api/orders).
                     </p>
                 </CardContent>
             </Card>

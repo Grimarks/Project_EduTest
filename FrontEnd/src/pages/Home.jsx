@@ -12,7 +12,6 @@ import {
 import heroImage from "../assets/hero-education.jpg";
 import TestCard from "../components/TestCard";
 
-// UI Components
 import { Button } from "../components/ui/button.jsx";
 import {
     Card,

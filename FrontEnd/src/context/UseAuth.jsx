@@ -31,7 +31,6 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await axios.post("/auth/login", { email, password });
 
-            // Ambil token dari response backend
             const token = response.data?.token;
             if (token) {
                 localStorage.setItem("accessToken", token);
@@ -84,5 +83,4 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// Hook custom agar bisa dipakai di komponen lain
 export const useAuth = () => useContext(UseAuth);
