@@ -13,7 +13,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2, ChevronLeft, Save } from "lucide-react";
 
 const categories = ["Mathematics", "English", "Science", "General"];
@@ -22,7 +22,7 @@ const difficulties = ["Easy", "Medium", "Hard"];
 const AdminTestForm = () => {
     const { testId } = useParams(); // Akan undefined jika ini halaman 'new'
     const navigate = useNavigate();
-    const { toast } = useToast();
+    // const { toast } = useToast(); // <-- HAPUS
 
     const [formData, setFormData] = useState({
         title: "",
@@ -50,21 +50,18 @@ const AdminTestForm = () => {
                         category: test.category || "General",
                         difficulty: test.difficulty || "Medium",
                         duration: test.duration || 60,
-                        is_premium: test.isPremium || false,
-                        image_url: test.image_url || "",
+                        is_premium: test.isPremium || test.is_premium || false,
                     });
                 })
                 .catch(err => {
                     console.error("Gagal fetch data tes:", err);
-                    toast({
-                        title: "Error",
-                        description: "Gagal mengambil data tes.",
-                        variant: "destructive",
+                    toast.error("Gagal mengambil data tes.", {
+                        description: err.response?.data?.error,
                     });
                 })
                 .finally(() => setIsFetching(false));
         }
-    }, [testId, isEditMode, toast]);
+    }, [testId, isEditMode]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -91,24 +88,16 @@ const AdminTestForm = () => {
         try {
             if (isEditMode) {
                 await axios.put(`/tests/${testId}`, payload);
-                toast({
-                    title: "Sukses!",
-                    description: "Tes berhasil diperbarui.",
-                });
+                toast.success("Tes berhasil diperbarui.");
             } else {
                 await axios.post("/tests", payload);
-                toast({
-                    title: "Sukses!",
-                    description: "Tes baru berhasil dibuat.",
-                });
+                toast.success("Tes baru berhasil dibuat.");
             }
             navigate("/admin/tests");
         } catch (error) {
             console.error("Gagal menyimpan tes:", error.response?.data);
-            toast({
-                title: "Gagal Menyimpan",
+            toast.error("Gagal Menyimpan", {
                 description: error.response?.data?.details || error.message,
-                variant: "destructive",
             });
         } finally {
             setIsLoading(false);
@@ -213,7 +202,6 @@ const AdminTestForm = () => {
                             />
                         </div>
 
-                        {/* URL Gambar (Opsional) */}
                         <div className="space-y-2">
                             <Label htmlFor="image_url">URL Gambar (Opsional)</Label>
                             <Input

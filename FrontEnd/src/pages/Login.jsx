@@ -13,7 +13,7 @@ import {
 } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
 import { BookOpen, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useToast } from "../hooks/use-toast.jsx";
+import { toast } from "sonner";
 import { useAuth } from "../context/UseAuth.jsx";
 
 const Login = () => {
@@ -22,7 +22,6 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { toast } = useToast();
     const { login } = useAuth();
 
     const handleSubmit = async (e) => {
@@ -31,17 +30,13 @@ const Login = () => {
 
         try {
             await login(email, password);
-            toast({
-                title: "Welcome back!",
+            toast.success("Welcome back!", {
                 description: "You have successfully logged in.",
             });
             navigate("/dashboard");
         } catch (error) {
-            toast({
-                title: "Login failed",
-                description:
-                    error.response?.data?.error || "Invalid email or password.",
-                variant: "destructive",
+            toast.error("Login failed", {
+                description: error.response?.data?.error || "Invalid email or password.",
             });
         } finally {
             setIsLoading(false);

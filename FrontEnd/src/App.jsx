@@ -27,6 +27,7 @@ import AdminManageUsers from "./pages/admin/AdminManageUsers.jsx";
 import AdminManageOrders from "./pages/admin/AdminManageOrders.jsx";
 import AdminTestForm from "./pages/admin/AdminTestForm.jsx";
 import AdminQuestionForm from "./pages/admin/AdminQuestionForm.jsx";
+import { Toaster } from "./components/ui/sonner.jsx";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => {
                                 </Routes>
                             </main>
                             <Footer />
+                            <Toaster></Toaster>
                         </div>
                     </BrowserRouter>
                 </TooltipProvider>

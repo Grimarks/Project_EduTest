@@ -5,11 +5,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Edit, Trash2, ChevronLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const AdminManageQuestions = () => {
         const { testId } = useParams();
-        const { toast } = useToast();
+        // const { toast } = useToast(); // <-- HAPUS
         const [questions, setQuestions] = useState([]);
         const [testTitle, setTestTitle] = useState("");
         const [isLoading, setIsLoading] = useState(true);
@@ -24,10 +24,8 @@ const AdminManageQuestions = () => {
                         setQuestions(questionsRes.data || []);
                 } catch (err) {
                         console.error("Gagal mengambil data soal:", err);
-                        toast({
-                                title: "Error",
-                                description: "Gagal mengambil data soal.",
-                                variant: "destructive",
+                        toast.error("Gagal mengambil data soal.", {
+                                description: err.response?.data?.error,
                         });
                 } finally {
                         setIsLoading(false);
@@ -41,15 +39,26 @@ const AdminManageQuestions = () => {
         }, [testId]);
 
         const handleDelete = async (questionId) => {
-                if (!window.confirm("Yakin ingin menghapus soal ini?")) return;
-                try {
-                        await axios.delete(`/questions/${questionId}`);
-                        toast({ title: "Sukses", description: "Soal berhasil dihapus." });
-                        fetchQuestions();
-                } catch (err) {
-                        console.error(err);
-                        toast({ title: "Error", description: "Gagal menghapus soal.", variant: "destructive" });
-                }
+                toast.warning("Apakah Anda yakin ingin menghapus soal ini?", {
+                        action: {
+                                label: "Hapus",
+                                onClick: async () => {
+                                        try {
+                                                await axios.delete(`/questions/${questionId}`);
+                                                toast.success("Soal berhasil dihapus.");
+                                                fetchQuestions();
+                                        } catch (err) {
+                                                console.error(err);
+                                                toast.error("Gagal menghapus soal.", {
+                                                        description: err.response?.data?.error,
+                                                });
+                                        }
+                                },
+                        },
+                        cancel: {
+                                label: "Batal",
+                        },
+                });
         };
 
         const getCorrectOptionText = (optionsJson, correctIndex) => {
@@ -111,7 +120,7 @@ const AdminManageQuestions = () => {
                                                                                 </Link>
                                                                         </Button>
                                                                         <Button variant="destructive" size="icon" onClick={() => handleDelete(q.id)}>
-                                                                                <Trash2 className="h-4 w-4" color="white" />
+                                                                                <Trash2 className="h-4 w-4" />
                                                                         </Button>
                                                                 </div>
                                                         </div>

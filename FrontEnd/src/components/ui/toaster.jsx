@@ -1,13 +1,35 @@
-import { create } from "zustand"
+"use client"
 
-const useToastStore = create((set) => ({
-    toasts: [],
-    addToast: (toast) => set((state) => ({ toasts: [...state.toasts, toast] })),
-    removeToast: (id) => set((state) => ({
-        toasts: state.toasts.filter((t) => t.id !== id)
-    })),
-}))
+import {
+    Toast,
+    ToastClose,
+    ToastDescription,
+    ToastProvider,
+    ToastTitle,
+    ToastViewport,
+} from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
 
-export function useToast() {
-    return useToastStore()
+export function Toaster() {
+    const { toasts } = useToast()
+
+    return (
+        <ToastProvider>
+            {toasts.map(function ({ id, title, description, action, ...props }) {
+                return (
+                    <Toast key={id} {...props}>
+                        <div className="grid gap-1">
+                            {title && <ToastTitle>{title}</ToastTitle>}
+                            {description && (
+                                <ToastDescription>{description}</ToastDescription>
+                            )}
+                        </div>
+                        {action}
+                        <ToastClose />
+                    </Toast>
+                )
+            })}
+            <ToastViewport />
+        </ToastProvider>
+    )
 }

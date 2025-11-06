@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Receipt, Upload, CheckCircle, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 
@@ -19,6 +19,7 @@ const formatPrice = (price) =>
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("id-ID");
 }
+
 const getOrderItemName = (itemType) => {
     switch (itemType) {
         case "premium_monthly":
@@ -34,7 +35,7 @@ const getOrderItemName = (itemType) => {
     }
 };
 const OrderItem = ({ order, fetchOrders }) => {
-    const { toast } = useToast();
+    // const { toast } = useToast(); // <-- HAPUS
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
 
@@ -47,29 +48,23 @@ const OrderItem = ({ order, fetchOrders }) => {
         formData.append("file", file);
 
         try {
-            // 1. Upload gambar ke endpoint /upload
             const uploadRes = await axios.post("/upload", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             const fileURL = uploadRes.data.url;
 
-            // 2. Kirim URL ke endpoint order
             await axios.put(`/orders/${order.id}/payment-proof`, {
                 url: fileURL,
             });
-
-            toast({
-                title: "Upload Sukses",
+            toast.success("Upload Sukses", {
                 description: "Bukti pembayaran berhasil diunggah. Mohon tunggu verifikasi admin."
             });
-            fetchOrders(); // Refresh daftar order
+            fetchOrders();
 
         } catch (err) {
             console.error("Gagal upload:", err);
-            toast({
-                title: "Upload Gagal",
+            toast.error("Upload Gagal", {
                 description: err.response?.data?.error || "Terjadi kesalahan.",
-                variant: "destructive"
             });
         } finally {
             setIsUploading(false);
@@ -83,11 +78,9 @@ const OrderItem = ({ order, fetchOrders }) => {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                 <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Order ID: {order.id}</p>
-                    {/* --- PERBAIKAN: Gunakan fungsi helper --- */}
                     <p className="text-lg font-semibold capitalize">
                         {getOrderItemName(order.item_type)}
                     </p>
-                    {/* --- PERBAIKAN: Sembunyikan jika ini langganan --- */}
                     {!isSubscription && (
                         <p className="text-sm">Item: {order.item_type} (ID: {order.item_id})</p>
                     )}

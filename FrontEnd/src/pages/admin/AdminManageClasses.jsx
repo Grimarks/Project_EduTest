@@ -4,15 +4,13 @@ import axios from "@/api/axiosConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2, User, Clock } from "lucide-react"; // <-- Impor Clock
+import { toast } from "sonner";
+import { Loader2, Plus, Edit, Trash2, User, Clock } from "lucide-react";
 
 const AdminManageClasses = () => {
         const [classes, setClasses] = useState([]);
         const [isLoading, setIsLoading] = useState(true);
         const [error, setError] = useState(null);
-        const { toast } = useToast();
-
         const fetchClasses = async () => {
                 setIsLoading(true);
                 try {
@@ -31,23 +29,26 @@ const AdminManageClasses = () => {
         }, []);
 
         const handleDelete = async (classId) => {
-                if (!window.confirm("Apakah Anda yakin ingin menghapus kelas ini?")) return;
-
-                try {
-                        await axios.delete(`/premium-classes/${classId}`);
-                        toast({
-                                title: "Sukses",
-                                description: "Kelas berhasil dihapus.",
-                        });
-                        fetchClasses();
-                } catch (err) {
-                        toast({
-                                title: "Error",
-                                description: "Gagal menghapus kelas.",
-                                variant: "destructive",
-                        });
-                        console.error(err);
-                }
+                toast.warning("Apakah Anda yakin ingin menghapus kelas ini?", {
+                        action: {
+                                label: "Hapus",
+                                onClick: async () => {
+                                        try {
+                                                await axios.delete(`/premium-classes/${classId}`);
+                                                toast.success("Kelas berhasil dihapus.");
+                                                fetchClasses();
+                                        } catch (err) {
+                                                toast.error("Gagal menghapus kelas.", {
+                                                        description: err.response?.data?.error,
+                                                });
+                                                console.error(err);
+                                        }
+                                },
+                        },
+                        cancel: {
+                                label: "Batal",
+                        },
+                });
         };
 
         return (
@@ -81,7 +82,6 @@ const AdminManageClasses = () => {
                                                             <User className="h-4 w-4" />
                                                             <span>{cls.instructor}</span>
                                                     </div>
-                                                    {/* --- PERBAIKAN: Ganti Harga dengan Durasi --- */}
                                                     <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                                                             <Clock className="h-4 w-4" />
                                                             <span>{cls.duration || "N/A"}</span>
@@ -99,7 +99,7 @@ const AdminManageClasses = () => {
                                                         size="sm"
                                                         onClick={() => handleDelete(cls.id)}
                                                     >
-                                                            <Trash2 className="h-4 w-4" color="white" />
+                                                            <Trash2 className="h-4 w-4" />
                                                     </Button>
                                             </CardFooter>
                                     </Card>

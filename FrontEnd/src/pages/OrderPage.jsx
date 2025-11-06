@@ -5,7 +5,7 @@ import { useAuth } from "@/context/UseAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Loader2, ArrowLeft, CreditCard, ShoppingBag, Star, CheckCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {Badge} from "@/components/ui/badge.jsx"
 import { cn } from "@/lib/utils";
 
@@ -46,28 +46,27 @@ const OrderPage = () => {
     const { itemType, itemId } = useParams();
     const navigate = useNavigate();
     const { user, isLoggedIn, isLoading: isAuthLoading } = useAuth();
-    const { toast } = useToast();
     const [item, setItem] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    const [selectedPlan, setSelectedPlan] = useState(premiumPlans[0]); // Default bulanan
+    const [selectedPlan, setSelectedPlan] = useState(premiumPlans[0]);
 
     useEffect(() => {
         if (!isLoggedIn && !isAuthLoading) {
-            toast({
-                title: "Silakan Login",
+            toast.error("Silakan Login", {
                 description: "Anda harus login untuk melakukan pemesanan.",
-                variant: "destructive",
             });
             navigate("/login");
             return;
         }
+
         if (isLoggedIn && itemType === 'premium' && itemId === 'membership') {
             setItem(VIRTUAL_PREMIUM_PRODUCT);
             setIsLoading(false);
             return;
         }
+
         const fetchItem = async () => {
             setIsLoading(true);
             setError(null);
@@ -83,8 +82,7 @@ const OrderPage = () => {
             }
 
             try {
-                const response = await axios.get(url);
-                const fetchedItem = response.data;
+                await axios.get(url);
                 setItem(VIRTUAL_PREMIUM_PRODUCT);
 
             } catch (err) {
@@ -98,7 +96,7 @@ const OrderPage = () => {
         if (isLoggedIn) {
             fetchItem();
         }
-    }, [itemType, itemId, isLoggedIn, isAuthLoading, navigate, toast]);
+    }, [itemType, itemId, isLoggedIn, isAuthLoading, navigate]);
 
     const handleCreateOrder = async () => {
         setIsSubmitting(true);
@@ -110,19 +108,15 @@ const OrderPage = () => {
             };
 
             await axios.post("/orders", payload);
-
-            toast({
-                title: "Order Dibuat!",
+            toast.success("Order Dibuat!", {
                 description: "Silakan lanjutkan ke pembayaran.",
             });
 
             navigate("/my-orders");
 
         } catch (err) {
-            toast({
-                title: "Gagal Membuat Order",
+            toast.error("Gagal Membuat Order", {
                 description: err.response?.data?.error || "Terjadi kesalahan.",
-                variant: "destructive",
             });
             console.error(err);
         } finally {
@@ -133,15 +127,12 @@ const OrderPage = () => {
     if (isLoading || isAuthLoading) {
         return <div className="p-8 text-center"><Loader2 className="h-12 w-12 animate-spin mx-auto" /></div>;
     }
-
     if (error) {
         return <div className="p-8 text-center text-destructive">{error}</div>;
     }
-
     if (!item) {
         return <div className="p-8 text-center">Item tidak ditemukan.</div>;
     }
-
     if (user?.is_premium) {
         return (
             <div className="p-8 text-center space-y-4">
@@ -153,7 +144,12 @@ const OrderPage = () => {
             </div>
         );
     }
-    const backLink = itemType === 'class' ? "/premium" : itemType === 'test' ? "/tests" : "/";
+
+    const backLink = itemType === 'class'
+        ? "/premium"
+        : itemType === 'test'
+            ? "/tests"
+            : "/";
 
     return (
         <div className="min-h-screen bg-gradient-page py-12 px-4">
@@ -196,7 +192,6 @@ const OrderPage = () => {
                             </CardContent>
                         </Card>
 
-                        {/* --- DITAMBAH: Pilihan Paket --- */}
                         <div className="space-y-4">
                             <h4 className="font-semibold">Pilih Paket Langganan:</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -223,7 +218,6 @@ const OrderPage = () => {
                                 ))}
                             </div>
                         </div>
-                        {/* --- AKHIR PILIHAN PAKET --- */}
 
                         <Card>
                             <CardContent className="p-4">
@@ -240,7 +234,9 @@ const OrderPage = () => {
                                 <span className="text-primary">{formatPrice(selectedPlan.price)}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Dengan mengklik "Konfirmasi & Bayar", Anda menyetujui bahwa pembelian ini akan memberikan Anda akses Premium ke seluruh platform.
+                                {itemType === 'premium'
+                                    ? "Dengan mengklik \"Konfirmasi & Bayar\", Anda menyetujui bahwa pembelian ini akan memberikan Anda akses Premium ke seluruh platform."
+                                    : "Dengan mengklik \"Konfirmasi & Bayar\", Anda akan diarahkan untuk membayar item ini."}
                             </p>
                         </div>
 

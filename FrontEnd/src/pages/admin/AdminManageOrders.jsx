@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCheck } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const getOrderItemName = (itemType) => {
     switch (itemType) {
@@ -13,9 +13,9 @@ const getOrderItemName = (itemType) => {
         case "premium_yearly":
             return "Langganan Premium (1 Tahun)";
         case "class":
-            return "Premium Class"; // Fallback
+            return "Premium Class";
         case "test":
-            return "Premium Test"; // Fallback
+            return "Premium Test";
         default:
             return "Aktivasi Akun Premium";
     }
@@ -25,8 +25,6 @@ const AdminManageOrders = () => {
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { toast } = useToast();
-
     const fetchOrders = async () => {
         setIsLoading(true);
         try {
@@ -45,23 +43,27 @@ const AdminManageOrders = () => {
     }, []);
 
     const handleVerify = async (orderId) => {
-        if (!window.confirm("Apakah Anda yakin ingin memverifikasi pesanan ini secara manual dan memberikan akses premium?")) return;
-
-        try {
-            await axios.put(`/orders/${orderId}/verify`);
-            toast({
-                title: "Sukses",
-                description: "Pesanan telah diverifikasi.",
-            });
-            fetchOrders();
-        } catch (err) {
-            toast({
-                title: "Error",
-                description: "Gagal memverifikasi pesanan.",
-                variant: "destructive",
-            });
-            console.error(err);
-        }
+        toast.warning("Verifikasi pembayaran dan berikan akses premium?", {
+            description: "Tindakan ini akan memberi user status premium.",
+            action: {
+                label: "Verifikasi",
+                onClick: async () => {
+                    try {
+                        await axios.put(`/orders/${orderId}/verify`);
+                        toast.success("Pesanan telah diverifikasi.");
+                        fetchOrders();
+                    } catch (err) {
+                        toast.error("Gagal memverifikasi pesanan.", {
+                            description: err.response?.data?.error,
+                        });
+                        console.error(err);
+                    }
+                },
+            },
+            cancel: {
+                label: "Batal",
+            },
+        });
     };
 
     const formatPrice = (price) =>
@@ -94,7 +96,6 @@ const AdminManageOrders = () => {
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                                         <div className="space-y-1">
                                             <p className="text-sm text-muted-foreground">Order ID: {order.id}</p>
-                                            {/* --- PERBAIKAN: Gunakan fungsi helper --- */}
                                             <p className="text-lg font-semibold capitalize">
                                                 {getOrderItemName(order.item_type)}
                                             </p>

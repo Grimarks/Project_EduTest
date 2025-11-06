@@ -49,8 +49,8 @@ const TestResult = () => {
     };
 
     const getScoreColor = (scoreValue) => {
-        if (scoreValue >= 80) return "text-secondary";
-        if (scoreValue >= 60) return "text-accent";
+        if (scoreValue >= 80) return "text-black";
+        if (scoreValue >= 60) return "text-orange-500";
         return "text-destructive";
     };
 
@@ -90,9 +90,9 @@ const TestResult = () => {
                         <div className="grid md:grid-cols-3 gap-6">
                             <div className="text-center space-y-2">
                                 <Target className="h-8 w-8 mx-auto text-primary" />
-                                <div className="text-2xl font-bold text-foreground">{correctAnswers}</div>
-                                <div className="text-sm text-muted-foreground">Correct Answers</div>
-                                <div className="text-xs text-muted-foreground">out of {totalQuestions}</div>
+                                <div className="text-2xl font-bold text-green-500">{correctAnswers}</div>
+                                <div className="text-sm text-green-500">Correct Answers</div>
+                                <div className="text-xs text-green-500">out of {totalQuestions}</div>
                             </div>
 
                             <div className="text-center space-y-2">
@@ -143,9 +143,9 @@ const TestResult = () => {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             {isCorrect ? (
-                                                <CheckCircle className="h-5 w-5 text-secondary" />
+                                                <CheckCircle className="h-5 w-5 text-green-500" />
                                             ) : (
-                                                <XCircle className="h-5 w-5 text-destructive" />
+                                                <XCircle className="h-5 w-5 text-red-500" />
                                             )}
                                         </div>
                                     </div>
@@ -156,9 +156,9 @@ const TestResult = () => {
                                                 key={optionIndex}
                                                 className={`p-2 rounded border text-sm ${
                                                     optionIndex === question.correctAnswer
-                                                        ? "border-secondary bg-secondary/10 text-secondary"
+                                                        ? "border-secondary bg-green-500"
                                                         : optionIndex === userAnswerIndex && !isCorrect
-                                                            ? "border-destructive bg-destructive/10 text-destructive"
+                                                            ? "border-destructive bg-red-500 text-black"
                                                             : "border-border"
                                                 }`}
                                             >

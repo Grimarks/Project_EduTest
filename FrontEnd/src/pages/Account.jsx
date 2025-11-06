@@ -10,16 +10,14 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { useToast } from "../hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "../context/UseAuth";
-import { User, LogOut, Eye, EyeOff } from "lucide-react";
+import { User, LogOut, Eye, EyeOff, Loader2 } from "lucide-react";
 
 const Account = () => {
     const navigate = useNavigate();
-    const { toast } = useToast();
     const { user, logout } = useAuth();
-
-    const [updating, setUpdating] = useState(false);
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
     const [name, setName] = useState(user?.name || "");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,32 +29,36 @@ const Account = () => {
         }
     }, [user]);
 
-    const handleUpdateProfile = (e) => {
+    const handleUpdatePassword = async (e) => {
         e.preventDefault();
-        toast({
-            title: "Info",
-            description:
-                "Update profile functionality not yet implemented in backend.",
-            variant: "info",
-        });
-    };
 
-    const handleUpdatePassword = (e) => {
-        e.preventDefault();
-        toast({
-            title: "Info",
-            description:
-                "Update password functionality not yet implemented in backend.",
-            variant: "info",
-        });
+        if (password !== confirmPassword) {
+            toast.error("Password tidak cocok.");
+            return;
+        }
+
+        setIsUpdatingPassword(true);
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            toast.info("Fitur ganti password belum diimplementasikan di backend.");
+            setPassword("");
+            setConfirmPassword("");
+
+        } catch (err) {
+            toast.error("Gagal memperbarui password.", {
+                description: err.response?.data?.error,
+            });
+        } finally {
+            setIsUpdatingPassword(false);
+        }
     };
 
     const handleSignOut = async () => {
         await logout();
-        toast({
-            title: "Signed out",
+        toast.success("Signed out", {
             description: "You have been signed out successfully",
-        });
+        });-
         navigate("/");
     };
 
@@ -67,7 +69,6 @@ const Account = () => {
     return (
         <div className="min-h-screen bg-gradient-subtle py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto space-y-6">
-                {/* Header */}
                 <div className="text-center">
                     <div className="bg-gradient-hero p-3 rounded-xl w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-glow">
                         <User className="h-8 w-8 text-primary-foreground" />
@@ -83,11 +84,11 @@ const Account = () => {
                     <CardHeader>
                         <CardTitle>Profile Information</CardTitle>
                         <CardDescription>
-                            Update your name and personal details
+                            Detail akun Anda. Fitur ganti nama belum tersedia.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleUpdateProfile} className="space-y-4">
+                        <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -108,15 +109,11 @@ const Account = () => {
                                     id="name"
                                     type="text"
                                     value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Enter your full name"
+                                    disabled
+                                    className="bg-muted"
                                 />
                             </div>
-
-                            <Button type="submit" disabled={updating}>
-                                {updating ? "Updating..." : "Update Profile"}
-                            </Button>
-                        </form>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -171,9 +168,12 @@ const Account = () => {
 
                             <Button
                                 type="submit"
-                                disabled={updating || !password}
+                                disabled={isUpdatingPassword || !password || password !== confirmPassword}
                             >
-                                {updating ? "Updating..." : "Update Password"}
+                                {isUpdatingPassword ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : null}
+                                {isUpdatingPassword ? "Updating..." : "Update Password"}
                             </Button>
                         </form>
                     </CardContent>

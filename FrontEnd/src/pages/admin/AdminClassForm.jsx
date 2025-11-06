@@ -12,15 +12,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2, ChevronLeft, Save } from "lucide-react";
 
 const categories = ["Mathematics", "English", "Science", "General", "Business"];
-
 const AdminClassForm = () => {
     const { classId } = useParams();
     const navigate = useNavigate();
-    const { toast } = useToast();
 
     const [formData, setFormData] = useState({
         title: "",
@@ -52,15 +50,13 @@ const AdminClassForm = () => {
                 })
                 .catch(err => {
                     console.error("Gagal fetch data kelas:", err);
-                    toast({
-                        title: "Error",
-                        description: "Gagal mengambil data kelas.",
-                        variant: "destructive",
+                    toast.error("Gagal mengambil data kelas.", {
+                        description: err.response?.data?.error,
                     });
                 })
                 .finally(() => setIsFetching(false));
         }
-    }, [classId, isEditMode, toast]);
+    }, [classId, isEditMode]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -75,30 +71,21 @@ const AdminClassForm = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        // eslint-disable-next-line no-unused-vars
-        const { price, ...payload } = formData;
+        const payload = formData;
 
         try {
             if (isEditMode) {
                 await axios.put(`/premium-classes/${classId}`, payload);
-                toast({
-                    title: "Sukses!",
-                    description: "Kelas berhasil diperbarui.",
-                });
+                toast.success("Kelas berhasil diperbarui.");
             } else {
                 await axios.post("/premium-classes", payload);
-                toast({
-                    title: "Sukses!",
-                    description: "Kelas baru berhasil dibuat.",
-                });
+                toast.success("Kelas baru berhasil dibuat.");
             }
             navigate("/admin/classes");
         } catch (error) {
             console.error("Gagal menyimpan kelas:", error.response?.data);
-            toast({
-                title: "Gagal Menyimpan",
+            toast.error("Gagal Menyimpan", {
                 description: error.response?.data?.error || error.message,
-                variant: "destructive",
             });
         } finally {
             setIsLoading(false);
@@ -183,7 +170,7 @@ const AdminClassForm = () => {
                             </Select>
                         </div>
 
-                        {/* --- DITAMBAH: Durasi --- */}
+                        {/* Durasi */}
                         <div className="space-y-2">
                             <Label htmlFor="duration">Durasi</Label>
                             <Input

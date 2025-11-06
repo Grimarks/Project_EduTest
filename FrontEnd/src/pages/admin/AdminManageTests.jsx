@@ -4,14 +4,13 @@ import axios from "@/api/axiosConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2, Plus, Edit, Trash2, FilePenLine } from "lucide-react";
 
 const AdminManageTests = () => {
     const [tests, setTests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { toast } = useToast();
 
     const fetchTests = async () => {
         setIsLoading(true);
@@ -31,23 +30,28 @@ const AdminManageTests = () => {
     }, []);
 
     const handleDelete = async (testId) => {
-        if (!window.confirm("Apakah Anda yakin ingin menghapus tes ini?")) return;
-
-        try {
-            await axios.delete(`/tests/${testId}`); //
-            toast({
-                title: "Sukses",
-                description: "Tes berhasil dihapus.",
-            });
-            fetchTests();
-        } catch (err) {
-            toast({
-                title: "Error",
-                description: "Gagal menghapus tes. (Cek console)",
-                variant: "destructive",
-            });
-            console.error(err);
-        }
+        // --- PERBAIKAN: Ganti window.confirm ---
+        toast.warning("Apakah Anda yakin ingin menghapus tes ini?", {
+            description: "Semua soal di dalamnya juga akan terhapus.",
+            action: {
+                label: "Hapus",
+                onClick: async () => {
+                    try {
+                        await axios.delete(`/tests/${testId}`);
+                        toast.success("Tes berhasil dihapus.");
+                        fetchTests();
+                    } catch (err) {
+                        toast.error("Gagal menghapus tes.", {
+                            description: err.response?.data?.error || "Cek console",
+                        });
+                        console.error(err);
+                    }
+                },
+            },
+            cancel: {
+                label: "Batal",
+            },
+        });
     };
 
     return (
@@ -88,7 +92,6 @@ const AdminManageTests = () => {
                                 </p>
                             </CardContent>
                             <CardFooter className="flex gap-2">
-                                {/* --- PERBAIKAN: Tombol Edit --- */}
                                 <Button variant="outline" size="sm" className="flex-1" asChild>
                                     <Link to={`/admin/tests/edit/${test.id}`}>
                                         <Edit className="h-4 w-4 mr-2" />
@@ -106,7 +109,7 @@ const AdminManageTests = () => {
                                     size="sm"
                                     onClick={() => handleDelete(test.id)}
                                 >
-                                    <Trash2 className="h-4 w-4" color="white" />
+                                    <Trash2 className="h-4 w-4" />
                                 </Button>
                             </CardFooter>
                         </Card>

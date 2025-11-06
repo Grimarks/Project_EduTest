@@ -7,13 +7,12 @@ import { Progress } from "../components/ui/progress";
 import { Badge } from "../components/ui/badge";
 import { Clock, ChevronLeft, ChevronRight, Flag, ShieldAlert } from "lucide-react";
 import { useAuth } from "../context/UseAuth";
-import { useToast } from "../hooks/use-toast";
+import { toast } from "sonner";
 
 const TakeTest = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { toast } = useToast(); // Panggil hook toast
     const { user, isLoggedIn, isLoading: isAuthLoading } = useAuth();
     const [test, setTest] = useState(null);
     const [questions, setQuestions] = useState([]);
@@ -23,18 +22,17 @@ const TakeTest = () => {
     const [answers, setAnswers] = useState({});
     const [timeLeft, setTimeLeft] = useState(0);
     const [isSubmitted, setIsSubmitted] = useState(false);
+
     const timerRef = useRef(null);
 
     useEffect(() => {
         if (!isAuthLoading && !isLoggedIn) {
-            toast({
-                title: "Akses Ditolak",
+            toast.error("Akses Ditolak", {
                 description: "Anda harus login untuk mengambil tes.",
-                variant: "destructive",
             });
             navigate("/login", { state: { from: location.pathname } });
         }
-    }, [isAuthLoading, isLoggedIn, navigate, location.pathname, toast]);
+    }, [isAuthLoading, isLoggedIn, navigate, location.pathname]);
 
     useEffect(() => {
         if (isAuthLoading || !isLoggedIn) return;
@@ -48,10 +46,8 @@ const TakeTest = () => {
 
                 if (fetchedTest.is_premium && !user?.is_premium) {
                     setError("Tes ini khusus untuk anggota premium.");
-                    toast({
-                        title: "Akses Ditolak",
+                    toast.error("Akses Ditolak", {
                         description: "Anda harus menjadi anggota premium untuk mengambil tes ini.",
-                        variant: "destructive",
                     });
                     setIsLoading(false);
                     return;
@@ -90,10 +86,8 @@ const TakeTest = () => {
             setTimeLeft((prevTime) => {
                 if (prevTime <= 1) {
                     clearInterval(timerRef.current);
-                    toast({
-                        title: "Waktu Habis!",
+                    toast.error("Waktu Habis!", {
                         description: "Hasil tes Anda sedang dikirim...",
-                        variant: "destructive",
                     });
                     handleSubmit(true);
                     return 0;
@@ -105,7 +99,7 @@ const TakeTest = () => {
         return () => {
             clearInterval(timerRef.current);
         };
-    }, [test, timeLeft, isSubmitted, toast]);
+    }, [test, timeLeft, isSubmitted]);
 
 
     const handleAnswerSelect = (questionId, optionIndex) => {
@@ -124,15 +118,8 @@ const TakeTest = () => {
         }
     };
 
-    const handleSubmit = async (isAutoSubmit = false) => {
+    const submitAction = async () => {
         if (isSubmitted) return;
-
-        if (!isAutoSubmit) {
-            if (!window.confirm("Apakah Anda yakin ingin menyelesaikan tes ini?")) {
-                return;
-            }
-        }
-
         setIsSubmitted(true);
         clearInterval(timerRef.current);
 
@@ -166,10 +153,24 @@ const TakeTest = () => {
         } catch (error) {
             console.error("Failed to submit test:", error);
             setIsSubmitted(false);
-            toast({
-                title: "Submit Gagal",
+            toast.error("Submit Gagal", {
                 description: "Gagal mengirimkan hasil tes. Coba lagi.",
-                variant: "destructive",
+            });
+        }
+    };
+
+    const handleSubmit = (isAutoSubmit = false) => {
+        if (isAutoSubmit) {
+            submitAction();
+        } else {
+            toast.warning("Apakah Anda yakin ingin menyelesaikan tes ini?", {
+                action: {
+                    label: "Ya, Selesaikan",
+                    onClick: () => submitAction(),
+                },
+                cancel: {
+                    label: "Batal",
+                },
             });
         }
     };
@@ -179,12 +180,11 @@ const TakeTest = () => {
         const secs = seconds % 60;
         return `${minutes}:${secs.toString().padStart(2, "0")}`;
     };
-
     const getTimeColor = () => {
         if (!test || !test.duration) return "text-foreground";
         const percentageLeft = (timeLeft / (test.duration * 60)) * 100;
         if (percentageLeft <= 10) return "text-destructive";
-        if (percentageLeft <= 25) return "text-yellow-500"; // Ganti accent
+        if (percentageLeft <= 25) return "text-yellow-500";
         return "text-foreground";
     };
 
@@ -274,7 +274,6 @@ const TakeTest = () => {
                         <ChevronLeft className="h-4 w-4 mr-2" /> Previous
                     </Button>
                     <div className="flex items-center gap-2">
-                        {/* Panggil handleSubmit tanpa argumen saat diklik manual */}
                         <Button variant="destructive" onClick={() => handleSubmit(false)}>
                             <Flag className="h-4 w-4 mr-2" /> Submit Test
                         </Button>
@@ -297,10 +296,10 @@ const TakeTest = () => {
                                     onClick={() => setCurrentQuestionIndex(index)}
                                     className={`w-10 h-10 rounded-lg text-sm font-medium transition-smooth ${
                                         index === currentQuestionIndex
-                                            ? "bg-primary text-primary-foreground"
+                                            ? "bg-primary text-white" 
                                             : answers[q.id] !== undefined
-                                                ? "bg-secondary text-secondary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                                ? "bg-secondary text-white" 
+                                                : "bg-destructive text-white " // <-- PERBAIKAN DI SINI
                                     }`}
                                 >
                                     {index + 1}
@@ -317,7 +316,7 @@ const TakeTest = () => {
                                 <span>Answered</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-muted rounded"></div>
+                                <div className="w-4 h-4 bg-destructive rounded"></div>
                                 <span>Not answered</span>
                             </div>
                         </div>

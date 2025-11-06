@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2, ChevronLeft, Save, Plus, X } from "lucide-react";
 import {
     Select,
@@ -18,9 +18,8 @@ import {
 const AdminQuestionForm = () => {
     const { testId, questionId } = useParams();
     const navigate = useNavigate();
-    const { toast } = useToast();
     const [questionText, setQuestionText] = useState("");
-    const [options, setOptions] = useState(["", "", "", ""]); // Default 4 pilihan
+    const [options, setOptions] = useState(["", "", "", ""]);
     const [correctAnswer, setCorrectAnswer] = useState(0);
     const [explanation, setExplanation] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -41,22 +40,25 @@ const AdminQuestionForm = () => {
                 })
                 .catch(err => {
                     console.error("Gagal fetch soal:", err);
-                    toast({ title: "Error", description: "Gagal memuat data soal.", variant: "destructive" });
+                    toast.error("Gagal memuat data soal.", {
+                        description: err.response?.data?.error,
+                    });
                 })
                 .finally(() => setIsFetching(false));
         }
-    }, [questionId, isEditMode, toast]);
+    }, [questionId, isEditMode]);
 
     const handleOptionChange = (index, value) => {
         const newOptions = [...options];
         newOptions[index] = value;
         setOptions(newOptions);
     };
+
     const addOption = () => setOptions([...options, ""]);
 
     const removeOption = (index) => {
         if (options.length <= 2) {
-            toast({ title: "Warning", description: "Minimal harus ada 2 pilihan jawaban.", variant: "destructive" });
+            toast.warning("Minimal harus ada 2 pilihan jawaban.");
             return;
         }
         setOptions(options.filter((_, i) => i !== index));
@@ -77,18 +79,16 @@ const AdminQuestionForm = () => {
         try {
             if (isEditMode) {
                 await axios.put(`/questions/${questionId}`, payload);
-                toast({ title: "Sukses", description: "Soal berhasil diperbarui." });
+                toast.success("Soal berhasil diperbarui.");
             } else {
                 await axios.post("/questions", payload);
-                toast({ title: "Sukses", description: "Soal baru berhasil ditambahkan." });
+                toast.success("Soal baru berhasil ditambahkan.");
             }
             navigate(`/admin/questions/${testId}`);
         } catch (error) {
             console.error("Gagal menyimpan soal:", error.response?.data);
-            toast({
-                title: "Gagal Menyimpan",
+            toast.error("Gagal Menyimpan", {
                 description: error.response?.data?.details || "Cek kembali data Anda.",
-                variant: "destructive",
             });
         } finally {
             setIsLoading(false);
@@ -143,7 +143,7 @@ const AdminQuestionForm = () => {
                                         size="icon"
                                         onClick={() => removeOption(index)}
                                     >
-                                        <X className="h-4 w-4" color="white"/>
+                                        <X className="h-4 w-4" />
                                     </Button>
                                 </div>
                             ))}

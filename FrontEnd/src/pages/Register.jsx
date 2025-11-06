@@ -14,7 +14,7 @@ import {
 import { Separator } from "../components/ui/separator";
 import { Checkbox } from "../components/ui/checkbox.jsx";
 import { BookOpen, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
-import { useToast } from "../hooks/use-toast.jsx";
+import { toast } from "sonner";
 import { useAuth } from "../context/UseAuth.jsx";
 
 const Register = () => {
@@ -29,7 +29,6 @@ const Register = () => {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { toast } = useToast();
     const { register } = useAuth();
 
     const handleInputChange = (e) => {
@@ -43,19 +42,15 @@ const Register = () => {
         e.preventDefault();
 
         if (formData.password !== formData.confirmPassword) {
-            toast({
-                title: "Password mismatch",
+            toast.error("Password mismatch", {
                 description: "Passwords do not match. Please try again.",
-                variant: "destructive",
             });
             return;
         }
 
         if (!acceptTerms) {
-            toast({
-                title: "Terms required",
+            toast.error("Terms required", {
                 description: "Please accept the terms and conditions to continue.",
-                variant: "destructive",
             });
             return;
         }
@@ -63,17 +58,13 @@ const Register = () => {
         setIsLoading(true);
         try {
             await register(formData.name, formData.email, formData.password);
-            toast({
-                title: "Account created!",
+            toast.success("Account created!", {
                 description: "Welcome to EduTest+. Please log in.",
             });
             navigate("/login");
         } catch (error) {
-            toast({
-                title: "Registration failed",
-                description:
-                    error.response?.data?.error || "Could not create account.",
-                variant: "destructive",
+            toast.error("Registration failed", {
+                description: error.response?.data?.error || "Could not create account.",
             });
         } finally {
             setIsLoading(false);
