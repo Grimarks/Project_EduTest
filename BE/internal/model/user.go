@@ -9,15 +9,15 @@ import (
 )
 
 type User struct {
-	ID           uuid.UUID `gorm:"type:char(36);primaryKey"` 
-	Name         string    `gorm:"type:varchar(255);not null"`
-	Email        string    `gorm:"type:varchar(255);unique;not null"`
-	PasswordHash string    `gorm:"type:varchar(255);not null"`
-	IsPremium    bool      `gorm:"default:false"`
-	PremiumExpiresAt *time.Time `gorm:"null"` // <-- TAMBAHKAN INI
-	Role         string    `gorm:"type:varchar(50);default:'user'"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID           uuid.UUID  `gorm:"type:char(36);primaryKey" json:"id"`
+	Name         string     `gorm:"type:varchar(255);not null" json:"name"`
+	Email        string     `gorm:"type:varchar(255);unique;not null" json:"email"`
+	PasswordHash string     `gorm:"type:varchar(255);not null" json:"-"`
+	IsPremium    bool       `gorm:"default:false" json:"is_premium"`
+	PremiumExpiresAt *time.Time `gorm:"null" json:"premium_expires_at,omitempty"`
+	Role         string     `gorm:"type:varchar(50);default:'user'" json:"role"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {

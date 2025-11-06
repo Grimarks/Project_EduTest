@@ -16,5 +16,5 @@ type Order struct {
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 
-	User User `gorm:"foreignKey:UserID"`
+	User User `gorm:"foreignKey:UserID" json:"User,omitempty"`
 }
