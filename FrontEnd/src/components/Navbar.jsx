@@ -9,6 +9,9 @@ const Navbar = () => {
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isLoggedIn, user, logout } = useAuth();
+
+    const isAdminPage = location.pathname.startsWith("/admin");
+
     const handleLogout = async () => {
         await logout();
         navigate("/");
@@ -22,7 +25,6 @@ const Navbar = () => {
         { name: "Dashboard", path: "/dashboard" },
     ];
 
-    //  My Orders muncul jika user login
     if (isLoggedIn) {
         navItems.push({ name: "My Orders", path: "/my-orders" });
     }
@@ -69,7 +71,7 @@ const Navbar = () => {
 
                                 {user?.role === 'admin' && (
                                     <Button variant="outline" size="sm" asChild>
-                                        <Link to="/admin/dashboard" className="text-accent hover:text-accent-foreground">
+                                        <Link to="/admin/dashboard" className="text-black hover:text-accent-foreground/80">
                                             <ShieldCheck className="h-4 w-4 mr-2" />
                                             Admin
                                         </Link>
@@ -96,19 +98,21 @@ const Navbar = () => {
                     </div>
 
                     {/* Tombol Menu Mobile */}
-                    <div className="md:hidden">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        >
-                            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                        </Button>
-                    </div>
+                    {!isAdminPage && (
+                        <div className="md:hidden">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            >
+                                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Menu Mobile */}
-                {isMenuOpen && (
+                {isMenuOpen && !isAdminPage && (
                     <div className="md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-card border-t border-border">
                             {navItems.map((item) => (
@@ -122,7 +126,6 @@ const Navbar = () => {
                                     }`}
                                     onClick={() => setIsMenuOpen(false)}
                                 >
-                                    {/* Icon untuk My Orders */}
                                     {item.path === "/my-orders" && <Receipt className="h-4 w-4 mr-2 inline" />}
                                     {item.name}
                                 </Link>
@@ -131,7 +134,7 @@ const Navbar = () => {
                             {isLoggedIn && user?.role === 'admin' && (
                                 <Link
                                     to="/admin/dashboard"
-                                    className={`block px-3 py-2 rounded-md text-base font-medium transition-smooth text-accent bg-accent/10`}
+                                    className={`block px-3 py-2 rounded-md text-base font-medium transition-smooth text-black bg-accent/10 hover:bg-accent/20`}
                                     onClick={() => setIsMenuOpen(false)}
                                 >
                                     <ShieldCheck className="h-4 w-4 mr-2 inline" />
@@ -165,7 +168,6 @@ const Navbar = () => {
                                         </Button>
                                     </>
                                 ) : (
-                                    // ... (tombol login/register mobile)
                                     <>
                                         <Button
                                             variant="ghost"
