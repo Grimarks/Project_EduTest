@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button.jsx";
-import { BookOpen, Menu, X, CircleUserRound, ShieldCheck, Receipt } from "lucide-react";
+import { BookOpen, Menu, X, CircleUserRound, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/UseAuth.jsx";
 
@@ -72,7 +72,6 @@ const Navbar = () => {
                                 {user?.role === 'admin' && (
                                     <Button variant="outline" size="sm" asChild>
                                         <Link to="/admin/dashboard" className="text-black hover:text-accent-foreground/80">
-                                            <ShieldCheck className="h-4 w-4 mr-2" />
                                             Admin
                                         </Link>
                                     </Button>
@@ -126,7 +125,7 @@ const Navbar = () => {
                                     }`}
                                     onClick={() => setIsMenuOpen(false)}
                                 >
-                                    {item.path === "/my-orders" && <Receipt className="h-4 w-4 mr-2 inline" />}
+                                    {item.path === "/my-orders"}
                                     {item.name}
                                 </Link>
                             ))}
@@ -134,10 +133,13 @@ const Navbar = () => {
                             {isLoggedIn && user?.role === 'admin' && (
                                 <Link
                                     to="/admin/dashboard"
-                                    className={`block px-3 py-2 rounded-md text-base font-medium transition-smooth text-black bg-accent/10 hover:bg-accent/20`}
+                                    className={`block px-3 py-2 rounded-md text-base font-medium transition-smooth ${
+                                        isActive("/admin/dashboard")
+                                            ? "text-primary bg-primary/10"
+                                            : "text-muted-foreground hover:text-primary hover:bg-muted"
+                                    }`}
                                     onClick={() => setIsMenuOpen(false)}
                                 >
-                                    <ShieldCheck className="h-4 w-4 mr-2 inline" />
                                     Admin Panel
                                 </Link>
                             )}

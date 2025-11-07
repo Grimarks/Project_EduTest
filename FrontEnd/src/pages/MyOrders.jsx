@@ -35,7 +35,6 @@ const getOrderItemName = (itemType) => {
     }
 };
 const OrderItem = ({ order, fetchOrders }) => {
-    // const { toast } = useToast(); // <-- HAPUS
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
 
@@ -56,6 +55,7 @@ const OrderItem = ({ order, fetchOrders }) => {
             await axios.put(`/orders/${order.id}/payment-proof`, {
                 url: fileURL,
             });
+
             toast.success("Upload Sukses", {
                 description: "Bukti pembayaran berhasil diunggah. Mohon tunggu verifikasi admin."
             });

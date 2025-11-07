@@ -27,8 +27,7 @@ const Dashboard = () => {
     const [stats, setStats] = useState({
         testsCompleted: 0,
         averageScore: 0,
-        studyTime: 0,
-        rank: "N/A",
+        studyTime: 0
     });
 
     const [recentTests, setRecentTests] = useState([]);
@@ -95,8 +94,7 @@ const Dashboard = () => {
                 setStats({
                     testsCompleted: completed,
                     averageScore: avgScore,
-                    studyTime: studyTimeFormatted,
-                    rank: "N/A",
+                    studyTime: studyTimeFormatted
                 });
 
                 setRecentTests(results.slice(0, 3));
@@ -128,8 +126,7 @@ const Dashboard = () => {
     const statCards = [
         { title: "Tests Completed", value: stats.testsCompleted, icon: BookOpen },
         { title: "Average Score", value: `${stats.averageScore}%`, icon: Trophy },
-        { title: "Study Time", value: stats.studyTime, icon: Clock },
-        { title: "Rank", value: stats.rank, icon: TrendingUp },
+        { title: "Study Time", value: stats.studyTime, icon: Clock }
     ];
 
     return (
@@ -153,7 +150,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"> {/* <-- DIUBAH */}
                     {statCards.map((stat, index) => (
                         <Card
                             key={index}
