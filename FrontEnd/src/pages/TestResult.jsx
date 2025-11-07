@@ -62,6 +62,12 @@ const TestResult = () => {
         return "Keep practicing! You'll get there.";
     };
 
+    const calculatePerformanceRating = (scoreValue) => {
+        if (typeof scoreValue !== 'number') return "N/A";
+        const rating = (scoreValue / 100) * 5;
+        return `${rating.toFixed(1)}/5`;
+    };
+
     if (!location.state) {
         return <div className="p-8 text-center">Loading result...</div>;
     }
@@ -103,7 +109,9 @@ const TestResult = () => {
 
                             <div className="text-center space-y-2">
                                 <Star className="h-8 w-8 mx-auto text-primary" />
-                                <div className="text-2xl font-bold text-foreground">4.2/5</div>
+                                <div className="text-2xl font-bold text-foreground">
+                                    {calculatePerformanceRating(score)}
+                                </div>
                                 <div className="text-sm text-muted-foreground">Performance</div>
                             </div>
                         </div>
