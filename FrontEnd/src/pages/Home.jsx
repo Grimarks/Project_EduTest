@@ -251,7 +251,7 @@ const Home = () => {
                                 </Button>
                                 <Button
                                     size="lg"
-                                    className="border-primary-foreground text-black bg-white hover:scale-105 transition-bounce shadow-card"
+                                    className="hover:scale-105 transition-bounce shadow-card"
                                 >
                                     <Link to="/premium">Explore Premium</Link>
                                 </Button>

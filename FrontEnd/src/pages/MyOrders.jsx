@@ -100,8 +100,8 @@ const OrderItem = ({ order, fetchOrders }) => {
                     {order.status === 'pending' && !order.payment_proof_url && (
                         <div className="p-3 bg-muted rounded-lg text-sm space-y-2 text-left md:text-right">
                             <p className="font-semibold">Silakan Transfer ke:</p>
-                            <p>BCA: 1234567890 (a.n. EduTest+)</p>
-                            <p>Mandiri: 0987654321 (a.n. EduTest+)</p>
+                            <p>BNI: 1907200505 (a.n. EduTest+)</p>
+                            <p>GOPAY: 081271148877 (a.n. EduTest+)</p>
                             <Button size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
                                 {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
                                 Upload Bukti Bayar

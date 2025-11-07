@@ -37,7 +37,7 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 }
 
 type UploadProofRequest struct {
-	URL string `json:"url" validate:"required,url"`
+	URL string `json:"url" validate:"required"`
 }
 
 func (h *OrderHandler) UploadPaymentProof(c *fiber.Ctx) error {

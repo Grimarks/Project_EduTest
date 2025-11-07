@@ -12,12 +12,11 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "../context/UseAuth";
-import { User, LogOut, Eye, EyeOff, Loader2 } from "lucide-react";
+import { User, LogOut, Eye, EyeOff, Loader2, LockKeyhole } from "lucide-react";
 
 const Account = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
-    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
     const [name, setName] = useState(user?.name || "");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,36 +28,17 @@ const Account = () => {
         }
     }, [user]);
 
+    // Button nya belum kepakai karena belum di implementasikan
     const handleUpdatePassword = async (e) => {
         e.preventDefault();
-
-        if (password !== confirmPassword) {
-            toast.error("Password tidak cocok.");
-            return;
-        }
-
-        setIsUpdatingPassword(true);
-
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            toast.info("Fitur ganti password belum diimplementasikan di backend.");
-            setPassword("");
-            setConfirmPassword("");
-
-        } catch (err) {
-            toast.error("Gagal memperbarui password.", {
-                description: err.response?.data?.error,
-            });
-        } finally {
-            setIsUpdatingPassword(false);
-        }
+        toast.info("Fitur ganti password saat ini belum tersedia.");
     };
 
     const handleSignOut = async () => {
         await logout();
         toast.success("Signed out", {
             description: "You have been signed out successfully",
-        });-
+        });
         navigate("/");
     };
 
@@ -122,11 +102,12 @@ const Account = () => {
                     <CardHeader>
                         <CardTitle>Change Password</CardTitle>
                         <CardDescription>
-                            Update your account password
+                            Fitur ganti password saat ini belum tersedia.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleUpdatePassword} className="space-y-4">
+                        {/* Form dinonaktifkan */}
+                        <form onSubmit={handleUpdatePassword} className="space-y-4 opacity-50 cursor-not-allowed">
                             <div className="space-y-2">
                                 <Label htmlFor="password">New Password</Label>
                                 <div className="relative">
@@ -136,6 +117,7 @@ const Account = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter new password"
+                                        disabled
                                     />
                                     <Button
                                         type="button"
@@ -143,6 +125,7 @@ const Account = () => {
                                         size="sm"
                                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                                         onClick={() => setShowPassword(!showPassword)}
+                                        disabled
                                     >
                                         {showPassword ? (
                                             <EyeOff className="h-4 w-4" />
@@ -163,17 +146,16 @@ const Account = () => {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     placeholder="Confirm new password"
+                                    disabled
                                 />
                             </div>
 
                             <Button
                                 type="submit"
-                                disabled={isUpdatingPassword || !password || password !== confirmPassword}
+                                disabled
                             >
-                                {isUpdatingPassword ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : null}
-                                {isUpdatingPassword ? "Updating..." : "Update Password"}
+                                <LockKeyhole className="mr-2 h-4 w-4" />
+                                Update Password
                             </Button>
                         </form>
                     </CardContent>
