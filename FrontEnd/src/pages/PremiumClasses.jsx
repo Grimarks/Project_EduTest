@@ -131,7 +131,7 @@ const PremiumClasses = () => {
                             {filteredClasses.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {filteredClasses.map((premiumClass, index) => {
-                                        let buttonLink = `/order/premium/membership`; // Link generik
+                                        let buttonLink = `/order/premium/membership`;
                                         let buttonText = "Upgrade to Premium";
                                         let buttonVariant = "default";
 
@@ -139,7 +139,7 @@ const PremiumClasses = () => {
                                             buttonLink = "/login";
                                             buttonText = "Login to Enroll";
                                         } else if (user?.is_premium) {
-                                            buttonLink = "/dashboard";
+                                            buttonLink = `/premium/class/${premiumClass.id}`;
                                             buttonText = "View Class (Premium)";
                                             buttonVariant = "outline";
                                         }

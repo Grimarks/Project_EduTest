@@ -10,6 +10,7 @@ import TakeTest from "./pages/TakeTest";
 import TestResult from "./pages/TestResult";
 import Dashboard from "./pages/Dashboard";
 import PremiumClasses from "./pages/PremiumClasses";
+import PremiumClassDetail from "./pages/PremiumClassDetail.jsx";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
@@ -47,6 +48,7 @@ const App = () => {
                                     <Route path="/result" element={<TestResult />} />
                                     <Route path="/dashboard" element={<Dashboard />} />
                                     <Route path="/premium" element={<PremiumClasses />} />
+                                    <Route path="/premium/class/:classId" element={<PremiumClassDetail />} />
                                     <Route path="/login" element={<Login />} />
                                     <Route path="/register" element={<Register />} />
                                     <Route path="/account" element={<Account/>}/>
