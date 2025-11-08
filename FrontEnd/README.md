@@ -43,8 +43,7 @@ Aplikasi ini terdiri dari dua alur besar: **Pengguna (User)** dan **Admin**.
 | Routing          | **React Router DOM (v7)**                                     |
 | State Management | **Zustand**, **React Context (useAuth)**                      |
 | Data Fetching    | **Axios**                                                     |
-| Server Caching   | **TanStack React Query**                                      |
-| Theme & Mode     | **next-themes** (dark/light mode)                             |
+| Server Caching   | **TanStack React Query**                                      |                        |
 | Notification     | **sonner**                                                    |
 | Linting          | **ESLint** (v9)                                               |
 
