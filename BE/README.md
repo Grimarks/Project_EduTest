@@ -2,9 +2,6 @@
 
 EduTest+ adalah platform aplikasi web modern yang dirancang untuk simulasi tes online dan penyediaan kelas premium. Aplikasi ini dibangun dengan arsitektur yang terpisah antara backend dan frontend, menggunakan Go untuk performa di sisi server dan React untuk antarmuka pengguna yang interaktif.
 
-## Tumpukan Teknologi (Tech Stack)
-
-Arsitektur proyek dibagi menjadi dua komponen utama:
 
 ### Backend (Go)
 
@@ -20,20 +17,6 @@ Dibangun menggunakan **Go (Golang)** dengan fokus pada performa, konkurensi, dan
 | **Validasi** | `validator/v10` | Untuk validasi struct pada request body yang masuk. |
 | **Kontainerisasi** | **Docker** | Dikonfigurasi dengan `docker-compose.yml` untuk lingkungan pengembangan yang konsisten. |
 
-### Frontend (React)
-
-Dibangun menggunakan **React** dengan **Vite** untuk pengalaman pengembangan yang cepat dan modern.
-
-| Kategori | Teknologi | Keterangan |
-| :--- | :--- | :--- |
-| **Framework** | **React 19** | Library utama untuk membangun antarmuka pengguna. |
-| **UI Components** | **shadcn/ui** & **Radix UI** | Kumpulan komponen UI yang dapat disesuaikan dan aksesibel. |
-| **Styling** | **Tailwind CSS** | Framework CSS utility-first untuk desain yang cepat dan kustom. |
-| **Routing** | **React Router DOM** | Untuk navigasi dan routing di sisi klien. |
-| **Data Fetching** | **Axios** | Klien HTTP berbasis promise untuk berinteraksi dengan API Backend. |
-| **Notifikasi** | **Sonner** | Pustaka untuk menampilkan notifikasi (toast) yang elegan. |
-
----
 
 ## Alur Utama Website
 
@@ -82,3 +65,6 @@ Admin memiliki panel khusus (`/admin`) yang dilindungi untuk mengelola seluruh k
 * **CRUD Soal**: Admin dapat menambah, mengedit, dan menghapus soal untuk setiap tes (`/admin/questions/:testId`).
 * **CRUD Kelas**: Admin mengelola daftar kelas premium (`/admin/classes`).
 * **Manajemen Pengguna**: Admin dapat melihat semua pengguna terdaftar dan mengubah `role` (misal, dari 'user' ke 'admin') atau status `is_premium` mereka secara manual (`/admin/users`).
+
+
+POSTMAN: https://documenter.getpostman.com/view/40679033/2sB3WwpHH1
